@@ -309,6 +309,8 @@ code { background: var(--card); border: 1px solid var(--border); border-radius: 
 }
 
 /* Utskrift (årsrapport → PDF via delningsmenyn) */
+.file-btn { text-align: center; cursor: pointer; }
+
 @media print {
   .tabbar, .no-print { display: none !important; }
   .content { padding-bottom: 0; }

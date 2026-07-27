@@ -26,9 +26,11 @@ import SlaughterhousesPage from './pages/SlaughterhousesPage'
 import AnnualReportPage from './pages/AnnualReportPage'
 import './index.css'
 
-// Kartsidorna lazy-laddas: Leaflet är stort och behövs inte vid appstart.
+// Kartsidorna och importsidan lazy-laddas: Leaflet och xlsx är stora
+// och behövs inte vid vanlig appstart.
 const PlacesPage = lazy(() => import('./pages/PlacesPage'))
 const PlaceFormPage = lazy(() => import('./pages/PlaceFormPage'))
+const ImportPage = lazy(() => import('./pages/ImportPage'))
 
 // basename följer Vites base så att appen fungerar både lokalt (/) och
 // på GitHub Pages (/Stalljournal/)
@@ -67,6 +69,7 @@ const router = createBrowserRouter([
       { path: 'mer/slakt/:id', element: <SlaughterFormPage /> },
       { path: 'mer/slakterier', element: <SlaughterhousesPage /> },
       { path: 'mer/rapport', element: <AnnualReportPage /> },
+      { path: 'mer/import', element: <Suspense fallback={null}><ImportPage /></Suspense> },
     ],
   },
 ], { basename })
