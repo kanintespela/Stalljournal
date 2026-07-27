@@ -1,0 +1,168 @@
+# Stalljournal — Arkitektur och byggspec
+
+**Bygger på:** `docs/kartlaggning.md` (fullständig kartläggning av AppSheet-appen).
+**Princip:** Det är *funktionerna* som ska överleva konverteringen, inte AppSheet-appens exakta utformning. Där AppSheet-modellen hade brister rättar vi dem här.
+
+**Revision 2 (2026-07-27):** Plattformsval ändrat från native SwiftUI till **offline-first PWA**, eftersom appägaren inte har Mac och inte vill betala för Apple Developer Program. Automationslogiken i §4 är bekräftad av appägaren; årsrapporten är för egen produktionsuppföljning.
+
+---
+
+## 0. Varför PWA — och vad det innebär
+
+Native iOS-appar kan bara byggas/signeras på en Mac och kräver Apple Developer Program (99 USD/år) för att installeras via TestFlight/App Store. Utan båda är native-spåret stängt.
+
+En **PWA** är en webbapp som installeras på hemskärmen från Safari ("Dela → Lägg till på hemskärmen") och därefter beter sig som en app: egen ikon, fullskärm utan webbläsarram, **fungerar offline**, kamera och GPS fungerar. Ingen Mac, inget Apple-konto, ingen App Store-granskning — och den fungerar på Android och dator också, med samma kodbas.
+
+Vad man ger upp jämfört med native, och varför det är acceptabelt här:
+
+| Begränsning | Bedömning för Stalljournal |
+|---|---|
+| Ingen App Store-närvaro | Irrelevant — appen är för eget bruk. |
+| Pushnotiser kräver iOS 16.4+ och att appen är installerad på hemskärmen | Acceptabelt; påminnelser (karens, lamning) fungerar när appen är installerad. |
+| Något mindre "native-känsla" i animationer | Marginellt; AppSheet var också webbaserat och detta blir snabbare än AppSheet. |
+| Safari kan i teorin rensa lagring för webbplatser som inte används | Gäller inte hemskärmsinstallerade appar i praktiken, och all data finns alltid även i molnet (Supabase) — telefonen är aldrig enda kopian. |
+
+**Kostnad för hela driften: 0 kr/mån** — statisk hosting (Cloudflare Pages/Vercel, gratis) + Supabase gratisnivå (räcker gott för en gårds datamängder: ~500 MB databas, 1 GB fillagring).
+
+## 1. Arkitekturbeslut
+
+| # | Beslut | Val | Motivering |
+|---|---|---|---|
+| A1 | Plattform | **PWA** — React + TypeScript + Vite | Enda vägen till iPhone utan Mac/Apple-konto. Samma app fungerar på Android/dator. Störst ekosystem, lätt att underhålla. |
+| A2 | Lokal lagring | **IndexedDB via Dexie** | Lokal databas i webbläsaren; sanningskälla offline. Dexie ger schema, index och transaktioner. |
+| A3 | Backend | **Supabase** (Postgres + Auth + Storage) | Riktig relationsdatabas ersätter Google Sheets. Auth och fleranvändarstöd ingår. Storage för foton/filer. Row Level Security ger gård-isolering. Gratisnivån räcker. |
+| A4 | Offline | **Offline-first** | Fältarbete i stall/hage utan täckning är appens vardag. Service worker cachar appen; Dexie håller datan; allt fungerar utan nät. |
+| A5 | Synkstrategi | Push/pull med `updated_at` + soft delete, **last-write-wins per rad** | Enkel, förutsägbar, tillräcklig för 1–5 användare på samma gård. |
+| A6 | Affärslogik | **I appen som explicita "use cases", transaktionellt** | AppSheets bots blir vanliga funktioner i en lokal transaktion (fungerar offline) och synkas som radändringar. **Bekräftat av appägaren:** (a) lamning skapar lamm som djur, (b) ny flytt avslutar föregående placering, (c) slakt markerar djuret och stänger grupprelationer, (d) gruppbehandling ger en journalrad per djur. |
+| A7 | Rapporter | Genereras i appen (utskriftsvänlig HTML → "Skriv ut/Spara som PDF", alt. jsPDF) | Årsrapporten är för **egen produktionsuppföljning** (ej myndighetsformat) — vi utformar den fritt: produktionsnyckeltal, lamningsresultat, tillväxt, slaktutfall, läkemedelsanvändning. |
+| A8 | Distribution | **Hemskärmsinstallation från Safari** + statisk hosting (Cloudflare Pages/Vercel) | Ingen butik, inga konton hos Apple, uppdateringar rullas ut direkt vid ny deploy. |
+| A9 | Språk | Svenska i UI, engelska i kod/schema | Undviker å/ä/ö-problem i kod och API. |
+| A10 | Kartor | **Leaflet + OpenStreetMap** | Gratis, ingen API-nyckel, räcker för platser/beten. |
+| A11 | Diagram | **Recharts** (viktkurvor m.m.) | Enkelt, väletablerat. |
+
+## 2. Systemöversikt
+
+```
+┌──────────────────── iPhone (Safari / hemskärmsapp) ───────────────────┐
+│  React-UI (svenska, mobilanpassat, stora tryckytor)                   │
+│      │                                                                │
+│  Use cases (affärslogik: lamning, flytt, slakt, gruppdos, karens …)   │
+│      │                                                                │
+│  Dexie / IndexedDB  ←— lokal sanningskälla, fungerar helt offline     │
+│      │                                          Service worker        │
+│  Synkmotor (bakgrund: push lokala ändringar,    cachar appen för      │
+│             pull fjärrändringar)                offline-start         │
+└──────┼────────────────────────────────────────────────────────────────┘
+       │ HTTPS (supabase-js)
+┌──────┴────────────────── Supabase (gratisnivå) ───────────────────────┐
+│  Postgres (samma schema + updated_at/deleted_at, RLS per gård)        │
+│  Auth (e-postinloggning, gårdsmedlemskap)                             │
+│  Storage (foton, träckprovsfiler, avräkningsfiler)                    │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+Synkmotorn: varje tabell har `updated_at` (sätts av den som skriver) och `deleted_at` (soft delete). Klienten push:ar lokala ändringar sedan senaste synk, pull:ar därefter rader med nyare `updated_at` än sitt vattenmärke. Foton laddas upp separat till Storage och refereras med path. Appen är fullt användbar utan konto/nät; synken aktiveras när Supabase är konfigurerat och nät finns.
+
+## 3. Datamodell v2 (rättade brister)
+
+*(Oförändrad från revision 1 — plattformsbytet påverkar inte modellen.)*
+
+### Tabeller
+
+```
+farm(id, name)                              -- gård; allt nedan har farm_id (framtidssäkring)
+user_profile(id, email, name, farm_id, role)
+
+animal(id, tag_number, se_number, name, birth_date, sex, breed,
+       mother_id→animal, father_id→animal, status, entry_date, exit_date,
+       exit_reason, photo_path, notes, lambing_id→lambing,
+       slaughter_status, planned_slaughter_date)
+place(id, name, type, description, active, lat, lng)
+herd_group(id, name, description, active)
+group_membership(id, animal_id→animal, group_id→herd_group,
+                 added_on, removed_on)      -- ersätter Aktiv-flaggan med datumintervall
+group_move(id, group_id→herd_group, place_id→place,
+           moved_on, ended_on, end_reason, note)
+
+treatment(id, animal_id→animal, date, drug, dose, route, treated_by,
+          diagnosis, veterinarian, withdrawal_days, note, photo_path)
+          -- karens t.o.m. = date + withdrawal_days: BERÄKNAS, lagras inte
+weighing(id, animal_id→animal, date, weight_kg, type)
+lambing(id, ewe_id→animal, date, live_count, dead_count, note)
+          -- lamm hämtas via animal.lambing_id: kolumnerna lamm_id_1..3 UTGÅR
+mating(id, ewe_id→animal, ram_id→animal, start_date, end_date)
+          -- beräknad lamning = start_date + 147 dagar: BERÄKNAS
+body_condition(id, animal_id→animal, date, score, note, photo_path)
+parasite_sample(id, date, animal_id?→animal, group_id?→herd_group, type,
+                result, note, file_path, trichostrongylida, haemonchus_pct,
+                t_axei_pct, chab_oes, n_filaria, n_spathiger, n_battus, capillaria)
+feeding(id, group_id→herd_group, date, feed_type, amount, note)
+
+slaughterhouse(id, name, address, contact, phone, email)
+slaughter(id, animal_id→animal, slaughterhouse_id→slaughterhouse, date,
+          status, carcass_weight, grade, fat_class, price_per_kg, note,
+          registered_by, registered_at)
+          -- intäkt = price_per_kg × carcass_weight: BERÄKNAS
+slaughter_settlement(id, slaughter_id→slaughter, date, carcass_weight,
+          grade, fat_class, price_per_kg, base_amount, adjustments,
+          slaughter_fee, transport_fee, total, vat, net_total, file_path)
+
+app_setting(key, value)
+```
+
+Alla tabeller får dessutom `farm_id`, `updated_at`, `deleted_at` för synk och gård-isolering.
+
+### Medvetna ändringar mot AppSheet-modellen
+
+1. **`far_id` blir riktig referens** (var fritext i AppSheet — brist).
+2. **`lamm_id_1..3` utgår** — lamm är `animal`-rader som pekar på sin `lambing`. Obegränsat antal lamm.
+3. **Djurstatus blir en enum** (`active`, `sold`, `slaughtered`, `dead`, `gone`) — ersätter Yes/No-`status` + fritext-`SlaktStatus`/`SlaktKlar`.
+4. **Gruppmedlemskap får datumintervall** (`added_on`/`removed_on`) — ger historik som AppSheet inte kunde svara på.
+5. **Beräknade värden lagras inte** (karens-t.o.m., intäkt, beräknad lamning, dagar på bete, aktuell plats) — räknas alltid ur källdatan.
+6. **Temp-tabellerna utgår** (`LäggTillDjurTempR`, `GruppBehandlingTemp`, `HelperTable`, `Vykontroll`) — blir skärm-state i appen.
+7. **`SlaktAvräkning` städas** — v2-schemat ovan är den avsedda strukturen.
+
+## 4. Affärslogik (ersätter AppSheets bots och formler) — BEKRÄFTAD
+
+Körs som lokala transaktioner — fungerar offline, synkas som vanliga radändringar.
+
+| Use case | Utlöses av | Gör |
+|---|---|---|
+| **Registrera lamning** ✅ | Lamningsformulär sparas | Skapar `lambing`-raden + en `animal`-rad per levande lamm (mor = tackan, far = baggen från senaste `mating` om entydig, födelsedatum = lamningsdatum, status = aktiv, `lambing_id` satt). |
+| **Flytta grupp** ✅ | Flyttformulär sparas | Skapar ny `group_move` och sätter `ended_on` på gruppens föregående öppna flytt. Aktuell plats = platsen i gruppens öppna flytt. |
+| **Registrera slakt** ✅ | Slaktstatus sätts till *Slaktad* | Sätter djurets status till `slaughtered` + `exit_date`, avslutar djurets öppna gruppmedlemskap (`removed_on` = slaktdatum). |
+| **Gruppbehandling** ✅ | "Behandla grupp"-formulär | Skapar en `treatment`-rad per aktivt djur i gruppen. |
+| **Karensvakt** | Härledd, visas löpande | Djur med pågående karens flaggas i djurlistan och blockerar slaktregistrering med varning. |
+| **Dräktighetsprognos** | Härledd | Beräknad lamning = `mating.start_date + 147 dagar`. |
+| **Årsrapport** | Rapportknapp | Produktionsuppföljning för valt år: lamningsresultat (lamm/tacka, dödlighet), tillväxt (medeldaglig viktökning), slaktutfall (vikter, klassning, intäkt), läkemedelsanvändning, besättningsutveckling. Utskriftsvänlig → PDF via delningsmenyn. |
+
+## 5. Skärmstruktur
+
+Bottennav (5 flikar):
+
+1. **Djur** — sökbar lista (filter: aktiva/alla), detaljvy med flikar: översikt/härstamning, viktkurva (diagram), behandlingar + karensstatus, lamningar, hull, slakt.
+2. **Grupper** — grupper med aktuellt antal och plats; gruppdetalj med medlemmar, flytta-knapp, gruppbehandling, foder.
+3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, foder.
+4. **Platser** — lista + kartvy (Leaflet/OSM) med grupper på plats, betesdagar.
+5. **Mer** — slakt & avräkning, slakterier, årsrapport, inställningar, synkstatus.
+
+Genomgående: registrering ska klaras med en hand i fält — stora tryckytor, senaste/vanligaste värden förifyllda, djurval via sök på märkning.
+
+## 6. Byggfaser
+
+| Fas | Innehåll | Resultat |
+|---|---|---|
+| **1. Grund** | Vite/React/TS-projekt, PWA-manifest + service worker, Dexie-schema, djurregistret CRUD, bottennav | Installerbar app som visar/redigerar djur, helt offline |
+| **2. Fältfunktioner** | Grupper, platser, karta, flyttlogik, vägning + viktkurvor, behandlingar + karens, gruppbehandling | Daglig drift kan flyttas från AppSheet |
+| **3. Avel & hälsa** | Lamning (+ auto-skapa lamm), betäckning + prognos, hull, träckprov, foder | Full journalföring |
+| **4. Slakt & rapport** | Slaktflöde, avräkning, intäkter, årsrapport | Funktionsparitet + förbättringar |
+| **5. Moln & migrering** | Supabase-projekt + schema + RLS, synkmotor, auth, foton till Storage, datamigrering Sheets→Postgres, deploy till Cloudflare Pages/Vercel | Skarp drift på din iPhone, data i molnet |
+
+Fas 1–4 fungerar helt lokalt i telefonen/webbläsaren utan konto — du kan börja använda appen på riktigt innan molndelen finns. Synk och migrering läggs på sist.
+
+## 7. Frågor och svar (avklarade)
+
+1. **Mac/Apple-konto:** Nej och nej → **PWA-spåret valt** (detta dokument, rev 2).
+2. **Automationsantaganden:** Bekräftade (a–d ja).
+3. **Årsrapport:** Egen produktionsuppföljning — utformas fritt med produktionsnyckeltal.
+4. **Migrering (fas 5):** Export av hela Google-arket + åtkomst till foto-mappen i Drive behövs först då.

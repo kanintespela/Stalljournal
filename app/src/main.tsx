@@ -1,0 +1,78 @@
+import { StrictMode, Suspense, lazy } from 'react'
+import { createRoot } from 'react-dom/client'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import App from './App'
+import AnimalsPage from './pages/AnimalsPage'
+import AnimalDetailPage from './pages/AnimalDetailPage'
+import AnimalFormPage from './pages/AnimalFormPage'
+import GroupsPage from './pages/GroupsPage'
+import GroupDetailPage from './pages/GroupDetailPage'
+import GroupFormPage from './pages/GroupFormPage'
+import AddMembersPage from './pages/AddMembersPage'
+import MoveGroupPage from './pages/MoveGroupPage'
+import GroupTreatmentPage from './pages/GroupTreatmentPage'
+import JournalPage from './pages/JournalPage'
+import WeighingFormPage from './pages/WeighingFormPage'
+import TreatmentFormPage from './pages/TreatmentFormPage'
+import LambingFormPage from './pages/LambingFormPage'
+import MatingFormPage from './pages/MatingFormPage'
+import BodyConditionFormPage from './pages/BodyConditionFormPage'
+import ParasiteSampleFormPage from './pages/ParasiteSampleFormPage'
+import FeedingFormPage from './pages/FeedingFormPage'
+import MorePage from './pages/MorePage'
+import SlaughtersPage from './pages/SlaughtersPage'
+import SlaughterFormPage from './pages/SlaughterFormPage'
+import SlaughterhousesPage from './pages/SlaughterhousesPage'
+import AnnualReportPage from './pages/AnnualReportPage'
+import './index.css'
+
+// Kartsidorna lazy-laddas: Leaflet är stort och behövs inte vid appstart.
+const PlacesPage = lazy(() => import('./pages/PlacesPage'))
+const PlaceFormPage = lazy(() => import('./pages/PlaceFormPage'))
+
+// basename följer Vites base så att appen fungerar både lokalt (/) och
+// på GitHub Pages (/Stalljournal/)
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <App />,
+    children: [
+      { index: true, element: <AnimalsPage /> },
+      { path: 'djur/ny', element: <AnimalFormPage /> },
+      { path: 'djur/:id', element: <AnimalDetailPage /> },
+      { path: 'djur/:id/redigera', element: <AnimalFormPage /> },
+      { path: 'grupper', element: <GroupsPage /> },
+      { path: 'grupper/ny', element: <GroupFormPage /> },
+      { path: 'grupper/:id', element: <GroupDetailPage /> },
+      { path: 'grupper/:id/redigera', element: <GroupFormPage /> },
+      { path: 'grupper/:id/medlemmar', element: <AddMembersPage /> },
+      { path: 'grupper/:id/flytta', element: <MoveGroupPage /> },
+      { path: 'grupper/:id/behandla', element: <GroupTreatmentPage /> },
+      { path: 'platser', element: <Suspense fallback={null}><PlacesPage /></Suspense> },
+      { path: 'platser/ny', element: <Suspense fallback={null}><PlaceFormPage /></Suspense> },
+      { path: 'platser/:id/redigera', element: <Suspense fallback={null}><PlaceFormPage /></Suspense> },
+      { path: 'journal', element: <JournalPage /> },
+      { path: 'journal/vagning', element: <WeighingFormPage /> },
+      { path: 'journal/behandling', element: <TreatmentFormPage /> },
+      { path: 'journal/lamning', element: <LambingFormPage /> },
+      { path: 'journal/betackning', element: <MatingFormPage /> },
+      { path: 'journal/hull', element: <BodyConditionFormPage /> },
+      { path: 'journal/trackprov', element: <ParasiteSampleFormPage /> },
+      { path: 'journal/foder', element: <FeedingFormPage /> },
+      { path: 'mer', element: <MorePage /> },
+      { path: 'mer/slakt', element: <SlaughtersPage /> },
+      { path: 'mer/slakt/ny', element: <SlaughterFormPage /> },
+      { path: 'mer/slakt/:id', element: <SlaughterFormPage /> },
+      { path: 'mer/slakterier', element: <SlaughterhousesPage /> },
+      { path: 'mer/rapport', element: <AnnualReportPage /> },
+    ],
+  },
+], { basename })
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <RouterProvider router={router} />
+  </StrictMode>,
+)
