@@ -8,12 +8,13 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg'],
+      // start_url/scope och navigateFallback härleds från Vites "base"
+      // (sätts med --base=/Stalljournal/ vid GitHub Pages-bygget)
       manifest: {
         name: 'Stalljournal',
         short_name: 'Stalljournal',
         description: 'Digital stalljournal för fårproducenter',
         lang: 'sv',
-        start_url: '/',
         display: 'standalone',
         background_color: '#f5f2ec',
         theme_color: '#3d5a3d',
@@ -25,7 +26,6 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        navigateFallback: '/index.html',
       },
     }),
   ],

@@ -30,6 +30,10 @@ import './index.css'
 const PlacesPage = lazy(() => import('./pages/PlacesPage'))
 const PlaceFormPage = lazy(() => import('./pages/PlaceFormPage'))
 
+// basename följer Vites base så att appen fungerar både lokalt (/) och
+// på GitHub Pages (/Stalljournal/)
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -65,7 +69,7 @@ const router = createBrowserRouter([
       { path: 'mer/rapport', element: <AnnualReportPage /> },
     ],
   },
-])
+], { basename })
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
