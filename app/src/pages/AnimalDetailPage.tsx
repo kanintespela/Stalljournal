@@ -1,7 +1,11 @@
+import { Suspense, lazy } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso } from '../db/db'
 import { ANIMAL_STATUS_LABELS, isInWithdrawal, withdrawalUntil } from '../db/types'
+import { groupsForAnimal } from '../logic/herd'
+
+const WeightChart = lazy(() => import('../components/WeightChart'))
 
 function fmtDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -36,6 +40,7 @@ export default function AnimalDetailPage() {
     const rows = await db.weighings.where('animal_id').equals(id).toArray()
     return rows.filter((w) => w.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
+  const groups = useLiveQuery(() => (id ? groupsForAnimal(id) : []), [id])
 
   if (animal === undefined) return null
   if (!animal || animal.deleted_at) {
@@ -87,6 +92,11 @@ export default function AnimalDetailPage() {
         </div>
       )}
 
+      <div className="action-grid">
+        <Link to={`/journal/vagning?djur=${animal.id}`} className="btn">⚖️ Väg</Link>
+        <Link to={`/journal/behandling?djur=${animal.id}`} className="btn">💊 Behandla</Link>
+      </div>
+
       <section className="section">
         <h2>Uppgifter</h2>
         <dl className="facts">
@@ -121,23 +131,44 @@ export default function AnimalDetailPage() {
         )}
       </section>
 
+      {groups && groups.length > 0 && (
+        <section className="section">
+          <h2>Grupper</h2>
+          <ul className="link-list">
+            {groups.map(({ membership, group }) => (
+              <li key={membership.id}>
+                <Link to={`/grupper/${group.id}`}>{group.name}</Link>
+                <span className="muted"> sedan {membership.added_on}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="section">
         <h2>Vägningar {weighings && weighings.length > 0 && `(${weighings.length})`}</h2>
         {!weighings || weighings.length === 0 ? (
-          <p className="muted">Inga vägningar registrerade. (Registrering byggs i fas 2.)</p>
+          <p className="muted">Inga vägningar registrerade.</p>
         ) : (
-          <ul className="link-list">
-            {weighings.slice(0, 5).map((w) => (
-              <li key={w.id}>{w.date}: <strong>{w.weight_kg} kg</strong>{w.type && ` (${w.type})`}</li>
-            ))}
-          </ul>
+          <>
+            {weighings.length >= 2 && (
+              <Suspense fallback={<div className="chart" style={{ height: 200 }} />}>
+                <WeightChart weighings={weighings} />
+              </Suspense>
+            )}
+            <ul className="link-list">
+              {weighings.slice(0, 5).map((w) => (
+                <li key={w.id}>{w.date}: <strong>{w.weight_kg} kg</strong>{w.type && ` (${w.type})`}</li>
+              ))}
+            </ul>
+          </>
         )}
       </section>
 
       <section className="section">
         <h2>Behandlingar {treatments && treatments.length > 0 && `(${treatments.length})`}</h2>
         {!treatments || treatments.length === 0 ? (
-          <p className="muted">Inga behandlingar registrerade. (Registrering byggs i fas 2.)</p>
+          <p className="muted">Inga behandlingar registrerade.</p>
         ) : (
           <ul className="link-list">
             {treatments.slice(0, 5).map((t) => (

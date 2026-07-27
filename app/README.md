@@ -21,7 +21,7 @@ npm run preview    # kör produktionsbygget lokalt
 ## Status (byggfaser, se arkitektur.md §6)
 
 - [x] **Fas 1 — Grund:** projekt, PWA-manifest/service worker, Dexie-schema (hela datamodell v2), bottennav, djurregistret (lista/sök/detalj/formulär med härstamning och dublettkontroll), karensvakt i djurlista/detalj
-- [ ] Fas 2 — Grupper, platser, karta, flytt, vägning, behandlingar
+- [x] **Fas 2 — Fältfunktioner:** grupper med medlemshantering (massval), platser med karta (Leaflet/OSM) och GPS-/kartvald position, flyttlogik (auto-stänger föregående placering, betesdagar), vägning med bulkläge och viktkurvor (Recharts, lazy-laddad), behandlingar med karens, gruppbehandling (en journalrad per djur), journalflik med händelsefeed
 - [ ] Fas 3 — Lamning, betäckning, hull, träckprov, foder
 - [ ] Fas 4 — Slakt, avräkning, årsrapport
 - [ ] Fas 5 — Supabase-synk, migrering från Google Sheets, deploy

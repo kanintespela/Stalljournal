@@ -187,3 +187,91 @@ a { color: var(--green); }
 .error { color: var(--danger); font-weight: 600; margin: 0; }
 
 code { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 0.85em; }
+
+/* Snabbknappar */
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.action-grid .btn { text-align: center; padding: 13px 8px; }
+
+/* Segmentväljare (lista/karta) */
+.segment {
+  display: flex;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  margin-bottom: 12px;
+}
+.segment button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px;
+  border-radius: 9px;
+  font-size: 0.92rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.segment button.active { background: var(--green); color: #fff; font-weight: 600; }
+
+/* Karta */
+.map {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  z-index: 0;
+}
+.position-picker { display: flex; flex-direction: column; gap: 8px; }
+.position-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.form-section-label { font-size: 0.88rem; color: var(--muted); font-weight: 500; display: block; margin-bottom: 6px; }
+.form-hint { font-size: 0.85rem; text-align: center; }
+
+/* Medlemslista med ta ur-knapp */
+.member-list { list-style: none; margin: 0; padding: 0; }
+.member-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+.member-list li:last-child { border-bottom: none; }
+.member-list .link-btn { margin-left: auto; }
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 6px;
+}
+
+/* Checkbox-lista (massval av djur) */
+.checkbox-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; padding-bottom: 80px; }
+.checkbox-list label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 0.95rem;
+}
+.checkbox-list input { width: 20px; height: 20px; flex-shrink: 0; }
+
+.sticky-footer {
+  position: fixed;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  left: 0; right: 0;
+  padding: 10px 16px;
+  background: linear-gradient(transparent, var(--bg) 30%);
+}
+.sticky-footer .btn { max-width: 640px; margin: 0 auto; display: block; }
+
+.chart { margin-bottom: 10px; }
