@@ -2,8 +2,9 @@ import { Suspense, lazy } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso } from '../db/db'
-import { ANIMAL_STATUS_LABELS, isInWithdrawal, withdrawalUntil } from '../db/types'
+import { ANIMAL_STATUS_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUntil } from '../db/types'
 import { groupsForAnimal } from '../logic/herd'
+import { activePregnancy } from '../logic/breeding'
 
 const WeightChart = lazy(() => import('../components/WeightChart'))
 
@@ -41,6 +42,26 @@ export default function AnimalDetailPage() {
     return rows.filter((w) => w.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
   const groups = useLiveQuery(() => (id ? groupsForAnimal(id) : []), [id])
+  const lambings = useLiveQuery(async () => {
+    if (!id) return []
+    const rows = await db.lambings.where('ewe_id').equals(id).toArray()
+    const live = rows.filter((l) => l.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
+    return Promise.all(
+      live.map(async (l) => ({
+        lambing: l,
+        lambs: (await db.animals.where('lambing_id').equals(l.id).toArray()).filter((a) => a.deleted_at === null),
+      })),
+    )
+  }, [id])
+  const conditions = useLiveQuery(async () => {
+    if (!id) return []
+    const rows = await db.body_conditions.where('animal_id').equals(id).toArray()
+    return rows.filter((c) => c.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
+  }, [id])
+  const pregnancy = useLiveQuery(
+    async () => (id && animal?.sex === 'tacka' ? activePregnancy(id) : undefined),
+    [id, animal?.sex],
+  )
 
   if (animal === undefined) return null
   if (!animal || animal.deleted_at) {
@@ -76,6 +97,9 @@ export default function AnimalDetailPage() {
         <span className="badge">{ANIMAL_STATUS_LABELS[animal.status]}</span>
         {animal.sex !== 'okänt' && <span className="badge">{animal.sex === 'tacka' ? 'Tacka' : 'Bagge'}</span>}
         {activeWithdrawals.length > 0 && <span className="badge badge-warn">Karens pågår</span>}
+        {pregnancy && (
+          <span className="badge">🐣 Beräknad lamning {fmtDate(expectedLambingDate(pregnancy))}</span>
+        )}
       </p>
 
       {activeWithdrawals.length > 0 && (
@@ -95,6 +119,10 @@ export default function AnimalDetailPage() {
       <div className="action-grid">
         <Link to={`/journal/vagning?djur=${animal.id}`} className="btn">⚖️ Väg</Link>
         <Link to={`/journal/behandling?djur=${animal.id}`} className="btn">💊 Behandla</Link>
+        {animal.sex === 'tacka' && animal.status === 'active' && (
+          <Link to={`/journal/lamning?tacka=${animal.id}`} className="btn">🐣 Lamning</Link>
+        )}
+        <Link to={`/journal/hull?djur=${animal.id}`} className="btn">🖐️ Hull</Link>
       </div>
 
       <section className="section">
@@ -164,6 +192,46 @@ export default function AnimalDetailPage() {
           </>
         )}
       </section>
+
+      {lambings && lambings.length > 0 && (
+        <section className="section">
+          <h2>Lamningar ({lambings.length})</h2>
+          <ul className="link-list">
+            {lambings.map(({ lambing, lambs }) => (
+              <li key={lambing.id}>
+                {lambing.date}: <strong>{lambing.live_count} lamm</strong>
+                {lambing.dead_count > 0 && ` (${lambing.dead_count} döda)`}
+                {lambs.length > 0 && (
+                  <>
+                    {' — '}
+                    {lambs.map((l, i) => (
+                      <span key={l.id}>
+                        {i > 0 && ', '}
+                        <Link to={`/djur/${l.id}`}>{l.tag_number}</Link>
+                      </span>
+                    ))}
+                  </>
+                )}
+                {lambing.note && <span className="muted"> — {lambing.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {conditions && conditions.length > 0 && (
+        <section className="section">
+          <h2>Hullbedömningar ({conditions.length})</h2>
+          <ul className="link-list">
+            {conditions.slice(0, 5).map((c) => (
+              <li key={c.id}>
+                {c.date}: <strong>{c.score}</strong>
+                {c.note && <span className="muted"> — {c.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="section">
         <h2>Behandlingar {treatments && treatments.length > 0 && `(${treatments.length})`}</h2>

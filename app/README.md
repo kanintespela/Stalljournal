@@ -22,6 +22,6 @@ npm run preview    # kör produktionsbygget lokalt
 
 - [x] **Fas 1 — Grund:** projekt, PWA-manifest/service worker, Dexie-schema (hela datamodell v2), bottennav, djurregistret (lista/sök/detalj/formulär med härstamning och dublettkontroll), karensvakt i djurlista/detalj
 - [x] **Fas 2 — Fältfunktioner:** grupper med medlemshantering (massval), platser med karta (Leaflet/OSM) och GPS-/kartvald position, flyttlogik (auto-stänger föregående placering, betesdagar), vägning med bulkläge och viktkurvor (Recharts, lazy-laddad), behandlingar med karens, gruppbehandling (en journalrad per djur), journalflik med händelsefeed
-- [ ] Fas 3 — Lamning, betäckning, hull, träckprov, foder
+- [x] **Fas 3 — Avel & hälsa:** lamning med automatiskt skapade lamm (mor/far/födelsedatum sätts, födelsevikt blir vägningsrad), betäckning med dräktighetsprognos (+147 dagar, badge på tackan tills lamning registrerats), hullbedömning, träckprov med parasitvärden (djur eller grupp), utfodring per grupp; alla händelsetyper i journalfeeden
 - [ ] Fas 4 — Slakt, avräkning, årsrapport
 - [ ] Fas 5 — Supabase-synk, migrering från Google Sheets, deploy

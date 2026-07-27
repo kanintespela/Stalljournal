@@ -14,6 +14,11 @@ import GroupTreatmentPage from './pages/GroupTreatmentPage'
 import JournalPage from './pages/JournalPage'
 import WeighingFormPage from './pages/WeighingFormPage'
 import TreatmentFormPage from './pages/TreatmentFormPage'
+import LambingFormPage from './pages/LambingFormPage'
+import MatingFormPage from './pages/MatingFormPage'
+import BodyConditionFormPage from './pages/BodyConditionFormPage'
+import ParasiteSampleFormPage from './pages/ParasiteSampleFormPage'
+import FeedingFormPage from './pages/FeedingFormPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import './index.css'
 
@@ -43,6 +48,11 @@ const router = createBrowserRouter([
       { path: 'journal', element: <JournalPage /> },
       { path: 'journal/vagning', element: <WeighingFormPage /> },
       { path: 'journal/behandling', element: <TreatmentFormPage /> },
+      { path: 'journal/lamning', element: <LambingFormPage /> },
+      { path: 'journal/betackning', element: <MatingFormPage /> },
+      { path: 'journal/hull', element: <BodyConditionFormPage /> },
+      { path: 'journal/trackprov', element: <ParasiteSampleFormPage /> },
+      { path: 'journal/foder', element: <FeedingFormPage /> },
       { path: 'mer', element: <PlaceholderPage title="Mer" phase="fas 4–5" /> },
     ],
   },
