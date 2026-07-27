@@ -29,6 +29,14 @@ export default function MorePage() {
             </div>
           </Link>
         </li>
+        <li>
+          <Link to="/mer/import" className="card">
+            <div className="card-main">
+              <span className="card-title">📥 Importera från AppSheet</span>
+              <span className="card-meta">Engångsimport av din Excel-export — tas bort efter användning</span>
+            </div>
+          </Link>
+        </li>
       </ul>
       <p className="muted form-hint">Moln-synk och inställningar kommer i fas 5.</p>
     </div>
