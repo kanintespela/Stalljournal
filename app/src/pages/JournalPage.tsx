@@ -4,6 +4,7 @@ import { db } from '../db/db'
 
 interface Event {
   date: string
+  category: string
   text: string
   link: string
 }
@@ -46,42 +47,50 @@ export default function JournalPage() {
     const all: Event[] = [
       ...weighings.map((w) => ({
         date: w.date,
-        text: `⚖️ ${tag(w.animal_id)}: ${w.weight_kg} kg`,
+        category: 'Vägning',
+        text: `${tag(w.animal_id)}: ${w.weight_kg} kg`,
         link: `/djur/${w.animal_id}`,
       })),
       ...treatments.map((t) => ({
         date: t.date,
-        text: `💊 ${tag(t.animal_id)}: ${t.drug}${t.withdrawal_days > 0 ? ` (karens ${t.withdrawal_days} d)` : ''}`,
+        category: 'Behandling',
+        text: `${tag(t.animal_id)}: ${t.drug}${t.withdrawal_days > 0 ? ` (karens ${t.withdrawal_days} d)` : ''}`,
         link: `/djur/${t.animal_id}`,
       })),
       ...moves.map((m) => ({
         date: m.moved_on,
-        text: `🚜 ${groups.get(m.group_id)?.name ?? '?'} → ${places.get(m.place_id)?.name ?? '?'}`,
+        category: 'Flytt',
+        text: `${groups.get(m.group_id)?.name ?? '?'} → ${places.get(m.place_id)?.name ?? '?'}`,
         link: `/grupper/${m.group_id}`,
       })),
       ...lambings.map((l) => ({
         date: l.date,
-        text: `🐣 ${tag(l.ewe_id)}: ${l.live_count} lamm${l.dead_count > 0 ? ` (${l.dead_count} döda)` : ''}`,
+        category: 'Lamning',
+        text: `${tag(l.ewe_id)}: ${l.live_count} lamm${l.dead_count > 0 ? ` (${l.dead_count} döda)` : ''}`,
         link: `/djur/${l.ewe_id}`,
       })),
       ...matings.map((m) => ({
         date: m.start_date,
-        text: `🐏 ${tag(m.ewe_id)} × ${tag(m.ram_id)}`,
+        category: 'Betäckning',
+        text: `${tag(m.ewe_id)} × ${tag(m.ram_id)}`,
         link: `/djur/${m.ewe_id}`,
       })),
       ...conditions.map((c) => ({
         date: c.date,
-        text: `🖐️ ${tag(c.animal_id)}: hull ${c.score}`,
+        category: 'Hull',
+        text: `${tag(c.animal_id)}: hull ${c.score}`,
         link: `/djur/${c.animal_id}`,
       })),
       ...samples.map((s) => ({
         date: s.date,
-        text: `🔬 ${s.animal_id ? tag(s.animal_id) : groups.get(s.group_id!)?.name ?? '?'}: ${s.type}${s.result ? ` — ${s.result}` : ''}`,
+        category: 'Provtagning',
+        text: `${s.animal_id ? tag(s.animal_id) : groups.get(s.group_id!)?.name ?? '?'}: ${s.type}${s.result ? ` — ${s.result}` : ''}`,
         link: s.animal_id ? `/djur/${s.animal_id}` : `/grupper/${s.group_id}`,
       })),
       ...feedings.map((f) => ({
         date: f.date,
-        text: `🌾 ${groups.get(f.group_id)?.name ?? '?'}: ${f.feed_type}${f.amount ? ` (${f.amount})` : ''}`,
+        category: 'Foder',
+        text: `${groups.get(f.group_id)?.name ?? '?'}: ${f.feed_type}${f.amount ? ` (${f.amount})` : ''}`,
         link: `/grupper/${f.group_id}`,
       })),
     ]
@@ -94,14 +103,14 @@ export default function JournalPage() {
       <h1>Journal</h1>
 
       <div className="action-grid">
-        <Link to="/journal/vagning" className="btn btn-primary">⚖️ Vägning</Link>
-        <Link to="/journal/behandling" className="btn btn-primary">💊 Behandling</Link>
-        <Link to="/journal/lamning" className="btn btn-primary">🐣 Lamning</Link>
-        <Link to="/journal/betackning" className="btn">🐏 Betäckning</Link>
-        <Link to="/journal/hull" className="btn">🖐️ Hullbedömning</Link>
-        <Link to="/journal/trackprov" className="btn">🔬 Träckprov</Link>
-        <Link to="/journal/foder" className="btn">🌾 Utfodring</Link>
-        <Link to="/grupper" className="btn">🚜 Flytta grupp</Link>
+        <Link to="/journal/vagning" className="btn btn-primary">Vägning</Link>
+        <Link to="/journal/behandling" className="btn btn-primary">Behandling</Link>
+        <Link to="/journal/lamning" className="btn btn-primary">Lamning</Link>
+        <Link to="/journal/betackning" className="btn">Betäckning</Link>
+        <Link to="/journal/hull" className="btn">Hullbedömning</Link>
+        <Link to="/journal/trackprov" className="btn">Träckprov</Link>
+        <Link to="/journal/foder" className="btn">Utfodring</Link>
+        <Link to="/grupper" className="btn">Flytta grupp</Link>
       </div>
 
       <section className="section">
@@ -112,7 +121,7 @@ export default function JournalPage() {
           <ul className="link-list">
             {events.map((e, i) => (
               <li key={i}>
-                <span className="muted">{e.date}</span>{' '}
+                <span className="muted">{e.date} · {e.category}</span>{' '}
                 <Link to={e.link}>{e.text}</Link>
               </li>
             ))}

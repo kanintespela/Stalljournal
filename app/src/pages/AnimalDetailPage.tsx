@@ -103,13 +103,13 @@ export default function AnimalDetailPage() {
         {animal.sex !== 'okänt' && <span className="badge">{animal.sex === 'tacka' ? 'Tacka' : 'Bagge'}</span>}
         {activeWithdrawals.length > 0 && <span className="badge badge-warn">Karens pågår</span>}
         {pregnancy && (
-          <span className="badge">🐣 Beräknad lamning {fmtDate(expectedLambingDate(pregnancy))}</span>
+          <span className="badge">Beräknad lamning {fmtDate(expectedLambingDate(pregnancy))}</span>
         )}
       </p>
 
       {activeWithdrawals.length > 0 && (
         <div className="alert">
-          ⚠️ Karens t.o.m.{' '}
+          Karens t.o.m.{' '}
           <strong>
             {fmtDate(
               activeWithdrawals
@@ -122,12 +122,12 @@ export default function AnimalDetailPage() {
       )}
 
       <div className="action-grid">
-        <Link to={`/journal/vagning?djur=${animal.id}`} className="btn">⚖️ Väg</Link>
-        <Link to={`/journal/behandling?djur=${animal.id}`} className="btn">💊 Behandla</Link>
+        <Link to={`/journal/vagning?djur=${animal.id}`} className="btn">Väg</Link>
+        <Link to={`/journal/behandling?djur=${animal.id}`} className="btn">Behandla</Link>
         {animal.sex === 'tacka' && animal.status === 'active' && (
-          <Link to={`/journal/lamning?tacka=${animal.id}`} className="btn">🐣 Lamning</Link>
+          <Link to={`/journal/lamning?tacka=${animal.id}`} className="btn">Lamning</Link>
         )}
-        <Link to={`/journal/hull?djur=${animal.id}`} className="btn">🖐️ Hull</Link>
+        <Link to={`/journal/hull?djur=${animal.id}`} className="btn">Hull</Link>
       </div>
 
       <section className="section">
@@ -248,7 +248,7 @@ export default function AnimalDetailPage() {
               <li key={t.id}>
                 {t.date}: <strong>{t.drug}</strong>
                 {t.withdrawal_days > 0 && ` — karens ${t.withdrawal_days} d`}
-                {isInWithdrawal(t) && ' ⚠️'}
+                {isInWithdrawal(t) && ' (pågår)'}
               </li>
             ))}
           </ul>

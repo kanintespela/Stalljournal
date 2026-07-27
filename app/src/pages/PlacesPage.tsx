@@ -62,7 +62,7 @@ export default function PlacesPage() {
                   </span>
                 </div>
                 <div className="card-badges">
-                  {place.lat != null && <span className="badge">📍</span>}
+                  {place.lat != null && <span className="badge">Karta</span>}
                   {!place.active && <span className="badge">Inaktiv</span>}
                 </div>
               </Link>

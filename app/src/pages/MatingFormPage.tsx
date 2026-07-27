@@ -87,7 +87,7 @@ export default function MatingFormPage() {
         </div>
         {expected && (
           <p className="chips">
-            <span className="badge">🐣 Beräknad lamning: {expected} (147 dagar)</span>
+            <span className="badge">Beräknad lamning: {expected} (147 dagar)</span>
           </p>
         )}
         {error && <p className="error">{error}</p>}

@@ -125,7 +125,7 @@ export default function ImportPage() {
 
       {step === 'done' && plan && (
         <section className="section">
-          <h2>✅ Import klar</h2>
+          <h2>Import klar</h2>
           <p>
             {plan.counts.Djur} djur, {plan.counts.Grupper} grupper, {plan.counts.Vägningar} vägningar
             och övriga poster har lagts till i appen.

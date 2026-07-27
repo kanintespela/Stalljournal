@@ -76,7 +76,7 @@ export default function PositionPicker({ lat, lng, onChange }: Props) {
   return (
     <div className="position-picker">
       <div className="position-row">
-        <button type="button" className="btn" onClick={useGps}>📍 Använd min position</button>
+        <button type="button" className="btn" onClick={useGps}>Använd min position</button>
         {lat != null && lng != null ? (
           <span className="muted">
             {lat.toFixed(5)}, {lng.toFixed(5)}{' '}

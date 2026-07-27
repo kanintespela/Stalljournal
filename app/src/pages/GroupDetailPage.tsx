@@ -63,7 +63,7 @@ export default function GroupDetailPage() {
         {!group.active && <span className="badge">Inaktiv</span>}
         {place && (
           <span className="badge">
-            📍 {place.name}{move && ` · ${daysBetween(move.moved_on, null)} dagar`}
+            {place.name}{move && ` · ${daysBetween(move.moved_on, null)} dagar`}
           </span>
         )}
       </p>

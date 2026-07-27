@@ -1,11 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { AnimalIcon, GroupIcon, JournalIcon, MoreIcon, PlaceIcon } from './components/icons'
 
 const TABS = [
-  { to: '/', label: 'Djur', icon: '🐑', end: true },
-  { to: '/grupper', label: 'Grupper', icon: '👥' },
-  { to: '/journal', label: 'Journal', icon: '📋' },
-  { to: '/platser', label: 'Platser', icon: '🗺️' },
-  { to: '/mer', label: 'Mer', icon: '⋯' },
+  { to: '/', label: 'Djur', Icon: AnimalIcon, end: true },
+  { to: '/grupper', label: 'Grupper', Icon: GroupIcon },
+  { to: '/journal', label: 'Journal', Icon: JournalIcon },
+  { to: '/platser', label: 'Platser', Icon: PlaceIcon },
+  { to: '/mer', label: 'Mer', Icon: MoreIcon },
 ]
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
             end={t.end}
             className={({ isActive }) => `tab${isActive ? ' active' : ''}`}
           >
-            <span className="tab-icon" aria-hidden>{t.icon}</span>
+            <t.Icon className="tab-icon" />
             <span className="tab-label">{t.label}</span>
           </NavLink>
         ))}

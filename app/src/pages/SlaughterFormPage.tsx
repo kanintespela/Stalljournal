@@ -64,7 +64,7 @@ export default function SlaughterFormPage() {
       if (cancelled) return
       setWarning(
         t
-          ? `⚠️ Karens pågår: ${t.drug} (t.o.m. ${withdrawalUntil(t)!.toISOString().slice(0, 10)}). Djuret får inte slaktas före det datumet.`
+          ? `Karens pågår: ${t.drug} (t.o.m. ${withdrawalUntil(t)!.toISOString().slice(0, 10)}). Djuret får inte slaktas före det datumet.`
           : '',
       )
     })
