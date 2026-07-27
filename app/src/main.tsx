@@ -19,7 +19,11 @@ import MatingFormPage from './pages/MatingFormPage'
 import BodyConditionFormPage from './pages/BodyConditionFormPage'
 import ParasiteSampleFormPage from './pages/ParasiteSampleFormPage'
 import FeedingFormPage from './pages/FeedingFormPage'
-import PlaceholderPage from './pages/PlaceholderPage'
+import MorePage from './pages/MorePage'
+import SlaughtersPage from './pages/SlaughtersPage'
+import SlaughterFormPage from './pages/SlaughterFormPage'
+import SlaughterhousesPage from './pages/SlaughterhousesPage'
+import AnnualReportPage from './pages/AnnualReportPage'
 import './index.css'
 
 // Kartsidorna lazy-laddas: Leaflet är stort och behövs inte vid appstart.
@@ -53,7 +57,12 @@ const router = createBrowserRouter([
       { path: 'journal/hull', element: <BodyConditionFormPage /> },
       { path: 'journal/trackprov', element: <ParasiteSampleFormPage /> },
       { path: 'journal/foder', element: <FeedingFormPage /> },
-      { path: 'mer', element: <PlaceholderPage title="Mer" phase="fas 4–5" /> },
+      { path: 'mer', element: <MorePage /> },
+      { path: 'mer/slakt', element: <SlaughtersPage /> },
+      { path: 'mer/slakt/ny', element: <SlaughterFormPage /> },
+      { path: 'mer/slakt/:id', element: <SlaughterFormPage /> },
+      { path: 'mer/slakterier', element: <SlaughterhousesPage /> },
+      { path: 'mer/rapport', element: <AnnualReportPage /> },
     ],
   },
 ])

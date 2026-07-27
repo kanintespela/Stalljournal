@@ -62,6 +62,11 @@ export default function AnimalDetailPage() {
     async () => (id && animal?.sex === 'tacka' ? activePregnancy(id) : undefined),
     [id, animal?.sex],
   )
+  const slaughters = useLiveQuery(async () => {
+    if (!id) return []
+    const rows = await db.slaughters.where('animal_id').equals(id).toArray()
+    return rows.filter((s) => s.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
+  }, [id])
 
   if (animal === undefined) return null
   if (!animal || animal.deleted_at) {
@@ -249,6 +254,23 @@ export default function AnimalDetailPage() {
           </ul>
         )}
       </section>
+
+      {slaughters && slaughters.length > 0 && (
+        <section className="section">
+          <h2>Slakt</h2>
+          <ul className="link-list">
+            {slaughters.map((s) => (
+              <li key={s.id}>
+                <Link to={`/mer/slakt/${s.id}`}>
+                  {s.date}: {s.status === 'done' ? 'Slaktad' : s.status === 'reported' ? 'Anmäld' : 'Planerad'}
+                  {s.carcass_weight != null && ` — ${s.carcass_weight} kg`}
+                  {s.grade && ` ${s.grade}${s.fat_class ? `/${s.fat_class}` : ''}`}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="section">
         <button className="btn btn-danger" onClick={remove}>Ta bort djur</button>
