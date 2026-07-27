@@ -5,6 +5,8 @@
 
 **Revision 2 (2026-07-27):** Plattformsval ändrat från native SwiftUI till **offline-first PWA**, eftersom appägaren inte har Mac och inte vill betala för Apple Developer Program. Automationslogiken i §4 är bekräftad av appägaren; årsrapporten är för egen produktionsuppföljning.
 
+**Revision 3 (2026-07-27):** Backend ändrat från Supabase (moln) till **självhostad PocketBase + Tailscale**, på appägarens egen begäran — man har hårdvara hemma som kan stå på och vill inte vara beroende av en molnleverantör. Se `docs/synk.md` för installationsguide. Synklogiken (push/pull, last-write-wins) är oförändrad i sak; bara var servern körs har ändrats.
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -20,9 +22,9 @@ Vad man ger upp jämfört med native, och varför det är acceptabelt här:
 | Ingen App Store-närvaro | Irrelevant — appen är för eget bruk. |
 | Pushnotiser kräver iOS 16.4+ och att appen är installerad på hemskärmen | Acceptabelt; påminnelser (karens, lamning) fungerar när appen är installerad. |
 | Något mindre "native-känsla" i animationer | Marginellt; AppSheet var också webbaserat och detta blir snabbare än AppSheet. |
-| Safari kan i teorin rensa lagring för webbplatser som inte används | Gäller inte hemskärmsinstallerade appar i praktiken, och all data finns alltid även i molnet (Supabase) — telefonen är aldrig enda kopian. |
+| Safari kan i teorin rensa lagring för webbplatser som inte används | Gäller inte hemskärmsinstallerade appar i praktiken, och all data finns alltid även på den egna servern hemma — telefonen är aldrig enda kopian när synk är aktiverad. |
 
-**Kostnad för hela driften: 0 kr/mån** — statisk hosting (Cloudflare Pages/Vercel, gratis) + Supabase gratisnivå (räcker gott för en gårds datamängder: ~500 MB databas, 1 GB fillagring).
+**Kostnad för hela driften: 0 kr/mån** (utöver hårdvara du redan äger) — GitHub Pages för appen (gratis) + självhostad PocketBase på egen hårdvara + Tailscale (gratis för privat bruk).
 
 ## 1. Arkitekturbeslut
 
@@ -30,7 +32,7 @@ Vad man ger upp jämfört med native, och varför det är acceptabelt här:
 |---|---|---|---|
 | A1 | Plattform | **PWA** — React + TypeScript + Vite | Enda vägen till iPhone utan Mac/Apple-konto. Samma app fungerar på Android/dator. Störst ekosystem, lätt att underhålla. |
 | A2 | Lokal lagring | **IndexedDB via Dexie** | Lokal databas i webbläsaren; sanningskälla offline. Dexie ger schema, index och transaktioner. |
-| A3 | Backend | **Supabase** (Postgres + Auth + Storage) | Riktig relationsdatabas ersätter Google Sheets. Auth och fleranvändarstöd ingår. Storage för foton/filer. Row Level Security ger gård-isolering. Gratisnivån räcker. |
+| A3 | Backend | **Självhostad PocketBase** (SQLite + Auth + REST/realtime-API), nådd via **Tailscale** | Riktig delad databas ersätter Google Sheets, körd på hårdvara appägaren redan har hemma — ingen molnleverantör, ingen månadskostnad. Tailscale ger säker åtkomst både på hemma-wifi och ute i fält utan att öppna portar mot internet. Enklare att självhosta än Supabase (en enda binär). Se `docs/synk.md`. |
 | A4 | Offline | **Offline-first** | Fältarbete i stall/hage utan täckning är appens vardag. Service worker cachar appen; Dexie håller datan; allt fungerar utan nät. |
 | A5 | Synkstrategi | Push/pull med `updated_at` + soft delete, **last-write-wins per rad** | Enkel, förutsägbar, tillräcklig för 1–5 användare på samma gård. |
 | A6 | Affärslogik | **I appen som explicita "use cases", transaktionellt** | AppSheets bots blir vanliga funktioner i en lokal transaktion (fungerar offline) och synkas som radändringar. **Bekräftat av appägaren:** (a) lamning skapar lamm som djur, (b) ny flytt avslutar föregående placering, (c) slakt markerar djuret och stänger grupprelationer, (d) gruppbehandling ger en journalrad per djur. |
@@ -53,15 +55,14 @@ Vad man ger upp jämfört med native, och varför det är acceptabelt här:
 │  Synkmotor (bakgrund: push lokala ändringar,    cachar appen för      │
 │             pull fjärrändringar)                offline-start         │
 └──────┼────────────────────────────────────────────────────────────────┘
-       │ HTTPS (supabase-js)
-┌──────┴────────────────── Supabase (gratisnivå) ───────────────────────┐
-│  Postgres (samma schema + updated_at/deleted_at, RLS per gård)        │
-│  Auth (e-postinloggning, gårdsmedlemskap)                             │
-│  Storage (foton, träckprovsfiler, avräkningsfiler)                    │
+       │ HTTPS via Tailscale (pocketbase-js)
+┌──────┴──────── PocketBase, självhostad hemma (Raspberry Pi/NAS) ──────┐
+│  SQLite (samma schema + client_id/updated_at/deleted_at)              │
+│  Auth (e-postinloggning, delad av alla på gården)                     │
 └───────────────────────────────────────────────────────────────────────┘
 ```
 
-Synkmotorn: varje tabell har `updated_at` (sätts av den som skriver) och `deleted_at` (soft delete). Klienten push:ar lokala ändringar sedan senaste synk, pull:ar därefter rader med nyare `updated_at` än sitt vattenmärke. Foton laddas upp separat till Storage och refereras med path. Appen är fullt användbar utan konto/nät; synken aktiveras när Supabase är konfigurerat och nät finns.
+Synkmotorn (`app/src/sync/`): varje tabell har `updated_at` (satt av klienten, avgör vem som vinner vid krock — last-write-wins) och `deleted_at` (soft delete). Push/pull körs vid appstart, var 5:e minut medan appen är öppen, vid återkommen nätanslutning, och manuellt via Mer → Synkronisering. PocketBases eget `updated`-systemfält (satt av servern) används bara för att effektivt avgöra vad som är nytt sedan sist vid pull — konflikthanteringen avgörs alltid av appens egna `updated_at`. Nollbara tal (parasitvärden, slaktvikt m.m.) lagras som text i PocketBase, inte som dess nummerfälttyp, eftersom PocketBase annars gör om ett tomt/null-värde till `0` — vilket gör "inget värde" och "värdet är faktiskt 0" omöjliga att skilja åt. Appen är fullt användbar utan server/nät; synken aktiveras när en PocketBase-server är konfigurerad under Mer → Synkronisering (se `docs/synk.md`).
 
 ## 3. Datamodell v2 (rättade brister)
 
@@ -156,9 +157,10 @@ Genomgående: registrering ska klaras med en hand i fält — stora tryckytor, s
 | **2. Fältfunktioner** | Grupper, platser, karta, flyttlogik, vägning + viktkurvor, behandlingar + karens, gruppbehandling | Daglig drift kan flyttas från AppSheet |
 | **3. Avel & hälsa** | Lamning (+ auto-skapa lamm), betäckning + prognos, hull, träckprov, foder | Full journalföring |
 | **4. Slakt & rapport** | Slaktflöde, avräkning, intäkter, årsrapport | Funktionsparitet + förbättringar |
-| **5. Moln & migrering** | Supabase-projekt + schema + RLS, synkmotor, auth, foton till Storage, datamigrering Sheets→Postgres, deploy till Cloudflare Pages/Vercel | Skarp drift på din iPhone, data i molnet |
+| **5a. Publicering** | GitHub Pages, PWA-installation | Appen nåbar och installerbar på alla enheter |
+| **5b. Delad data** | Självhostad PocketBase (schema i `server/pb_migrations/`), Tailscale, synkmotor, inloggning | Flera användare delar samma data, från valfri plats, appen fungerar fortfarande offline |
 
-Fas 1–4 fungerar helt lokalt i telefonen/webbläsaren utan konto — du kan börja använda appen på riktigt innan molndelen finns. Synk och migrering läggs på sist.
+Fas 1–4 fungerar helt lokalt i telefonen/webbläsaren utan konto — du kunde använda appen på riktigt innan delad data fanns. Se `docs/synk.md` för hur fas 5b sätts upp.
 
 ## 7. Frågor och svar (avklarade)
 

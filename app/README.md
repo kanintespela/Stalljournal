@@ -1,13 +1,13 @@
 # Stalljournal — PWA
 
-Offline-first webbapp (PWA) för fårproducenter. Se `../docs/arkitektur.md` för arkitekturen och `../docs/kartlaggning.md` för kartläggningen av AppSheet-appen den ersätter.
+Offline-first webbapp (PWA) för fårproducenter. Se `../docs/arkitektur.md` för arkitekturen, `../docs/kartlaggning.md` för kartläggningen av AppSheet-appen den ersätter, och `../docs/synk.md` för att sätta upp delad data mellan flera användare.
 
 ## Teknik
 
 - **React + TypeScript + Vite** — appramverk
 - **Dexie (IndexedDB)** — lokal databas, sanningskälla offline
 - **vite-plugin-pwa** — service worker + manifest, installeras på hemskärmen från Safari
-- **Supabase** (fas 5) — moln-synk, auth och fillagring
+- **PocketBase** (självhostad, se `../server/` och `../docs/synk.md`) + **Tailscale** — delad data mellan enheter/användare, ingen molnleverantör
 
 ## Utveckling
 
@@ -25,4 +25,4 @@ npm run preview    # kör produktionsbygget lokalt
 - [x] **Fas 3 — Avel & hälsa:** lamning med automatiskt skapade lamm (mor/far/födelsedatum sätts, födelsevikt blir vägningsrad), betäckning med dräktighetsprognos (+147 dagar, badge på tackan tills lamning registrerats), hullbedömning, träckprov med parasitvärden (djur eller grupp), utfodring per grupp; alla händelsetyper i journalfeeden
 - [x] **Fas 4 — Slakt & rapport:** slaktregister (planerad/anmäld/slaktad) med EUROP-klassning, fettgrupp och intäktsberäkning; karensvakt som varnar och blockerar slakt under pågående karens; vid genomförd slakt markeras djuret automatiskt som slaktat och tas ur sina grupper; slakteriregister; årsrapport (besättning, lamning, tillväxt, slakt, läkemedel) med utskrift/PDF
 - [x] **Fas 5a — Publicering:** GitHub Actions-workflow som bygger och publicerar appen till GitHub Pages vid varje push till `main` (`.github/workflows/deploy.yml`). Kräver att Pages är aktiverat i repo-inställningarna (Settings → Pages → Source: GitHub Actions). App-URL: `https://kanintespela.github.io/Stalljournal/`
-- [ ] Fas 5b — Supabase-synk (auth, moln-databas, foton) och migrering från Google Sheets
+- [x] **Fas 5b — Delad data:** synkmotor mot självhostad PocketBase (`app/src/sync/`) — push/pull med `updated_at`/`deleted_at`, last-write-wins, automatisk bakgrundssynk (appstart, var 5:e minut, vid återkommen nätanslutning) + manuell synk under Mer → Synkronisering. Serverschema i `server/pb_migrations/`, installationsguide i `docs/synk.md` (PocketBase + Tailscale).

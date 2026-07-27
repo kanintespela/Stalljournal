@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { isLoggedIn } from '../sync/client'
 
 export default function MorePage() {
   return (
@@ -30,6 +31,17 @@ export default function MorePage() {
           </Link>
         </li>
         <li>
+          <Link to="/mer/synk" className="card">
+            <div className="card-main">
+              <span className="card-title">Synkronisering</span>
+              <span className="card-meta">Dela data mellan enheter via din egen server</span>
+            </div>
+            <div className="card-badges">
+              <span className="badge">{isLoggedIn() ? 'Ansluten' : 'Ej ansluten'}</span>
+            </div>
+          </Link>
+        </li>
+        <li>
           <Link to="/mer/import" className="card">
             <div className="card-main">
               <span className="card-title">Importera från AppSheet</span>
@@ -38,7 +50,6 @@ export default function MorePage() {
           </Link>
         </li>
       </ul>
-      <p className="muted form-hint">Moln-synk och inställningar kommer i fas 5.</p>
     </div>
   )
 }

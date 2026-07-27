@@ -24,6 +24,7 @@ import SlaughtersPage from './pages/SlaughtersPage'
 import SlaughterFormPage from './pages/SlaughterFormPage'
 import SlaughterhousesPage from './pages/SlaughterhousesPage'
 import AnnualReportPage from './pages/AnnualReportPage'
+import SyncPage from './pages/SyncPage'
 import './index.css'
 
 // Kartsidorna och importsidan lazy-laddas: Leaflet och xlsx är stora
@@ -70,6 +71,7 @@ const router = createBrowserRouter([
       { path: 'mer/slakterier', element: <SlaughterhousesPage /> },
       { path: 'mer/rapport', element: <AnnualReportPage /> },
       { path: 'mer/import', element: <Suspense fallback={null}><ImportPage /></Suspense> },
+      { path: 'mer/synk', element: <SyncPage /> },
     ],
   },
 ], { basename })
