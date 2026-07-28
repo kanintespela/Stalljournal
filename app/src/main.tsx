@@ -28,7 +28,16 @@ import SlaughterFormPage from './pages/SlaughterFormPage'
 import SlaughterhousesPage from './pages/SlaughterhousesPage'
 import AnnualReportPage from './pages/AnnualReportPage'
 import SyncPage from './pages/SyncPage'
+import RouteError from './components/RouteError'
 import './index.css'
+
+// Efter en ny publicering får kodsplittade filer nya namn (hash), och gamla
+// filer försvinner från servern. Om en flik varit öppen sedan innan dess kan
+// en dynamisk import (t.ex. en lazy-laddad sida) misslyckas — då hämtar vi
+// om sidan för att ladda den nya versionen istället för att visa ett fel.
+window.addEventListener('vite:preloadError', () => {
+  window.location.reload()
+})
 
 // Kartsidorna och importsidan lazy-laddas: Leaflet och xlsx är stora
 // och behövs inte vid vanlig appstart.
@@ -44,6 +53,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
+    errorElement: <RouteError />,
     children: [
       { index: true, element: <AnimalsPage /> },
       { path: 'djur/ny', element: <AnimalFormPage /> },
