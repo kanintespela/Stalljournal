@@ -215,3 +215,14 @@ export function slaughterIncome(s: Pick<Slaughter, 'price_per_kg' | 'carcass_wei
   if (s.price_per_kg == null || s.carcass_weight == null) return null
   return s.price_per_kg * s.carcass_weight
 }
+
+// Foton kopplas till djur (flera per djur, t.ex. vid olika åldrar/exteriörbedömning).
+// Lagras lokalt som Blob i IndexedDB; synkas inte mot servern ännu (se docs/avel.md).
+export interface AnimalPhoto extends BaseRow {
+  animal_id: string
+  taken_on: string
+  note: string
+  blob: Blob
+  width: number
+  height: number
+}

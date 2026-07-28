@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type {
   Animal,
+  AnimalPhoto,
   AppSetting,
   BodyCondition,
   Feeding,
@@ -37,6 +38,7 @@ export class StalljournalDB extends Dexie {
   slaughters!: Table<Slaughter, string>
   slaughter_settlements!: Table<SlaughterSettlement, string>
   app_settings!: Table<AppSetting, string>
+  animal_photos!: Table<AnimalPhoto, string>
 
   constructor() {
     super('stalljournal')
@@ -57,6 +59,10 @@ export class StalljournalDB extends Dexie {
       slaughters: 'id, animal_id, slaughterhouse_id, date, status, updated_at',
       slaughter_settlements: 'id, slaughter_id, date, updated_at',
       app_settings: 'key',
+    })
+    // v2: foton kopplade till djur (lokal lagring, se docs/avel.md).
+    this.version(2).stores({
+      animal_photos: 'id, animal_id, taken_on, updated_at',
     })
   }
 }

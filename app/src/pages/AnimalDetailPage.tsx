@@ -5,6 +5,7 @@ import { db, nowIso } from '../db/db'
 import { ANIMAL_STATUS_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUntil } from '../db/types'
 import { groupsForAnimal } from '../logic/herd'
 import { activePregnancy } from '../logic/breeding'
+import PhotoGallery from '../components/PhotoGallery'
 
 const WeightChart = lazy(() => import('../components/WeightChart'))
 
@@ -129,6 +130,8 @@ export default function AnimalDetailPage() {
         )}
         <Link to={`/journal/hull?djur=${animal.id}`} className="btn">Hull</Link>
       </div>
+
+      <PhotoGallery animalId={animal.id} />
 
       <section className="section">
         <h2>Uppgifter</h2>
