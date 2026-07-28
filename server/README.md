@@ -8,22 +8,25 @@ Schemat för den självhostade synkservern. Se `../docs/synk.md` för fullständ
 
 ## Snabbstart
 
+Migrationerna är skrivna för **PocketBase v0.39.x** (nyare versioner byter ibland API för migrationsfiler och adminkommandon — kontrollera `./pocketbase --version` mot [releaselistan](https://github.com/pocketbase/pocketbase/releases) om du installerar en nyare version och migrationerna inte verkar ta).
+
 ```bash
 # 1. Hämta PocketBase (byt ut mot din plattform, se https://pocketbase.io/docs/)
-curl -LO https://github.com/pocketbase/pocketbase/releases/download/v0.22.21/pocketbase_0.22.21_linux_amd64.zip
-unzip pocketbase_0.22.21_linux_amd64.zip
+curl -LO https://github.com/pocketbase/pocketbase/releases/download/v0.39.9/pocketbase_0.39.9_linux_amd64.zip
+unzip pocketbase_0.39.9_linux_amd64.zip
 
 # 2. Lägg migrationerna på plats
 cp -r pb_migrations /sökväg/till/pocketbase/
 
-# 3. Skapa en administratör (engångskommando)
-./pocketbase admin create din@epost.se DittLösenord123
+# 3. Skapa ett superuser-konto (engångskommando — detta är bara för att
+#    administrera servern via Admin UI, inte samma sak som familjens inloggningar)
+./pocketbase superuser upsert din@epost.se DittLösenord123
 
 # 4. Starta servern
 ./pocketbase serve --http=0.0.0.0:8090
 ```
 
-Skapa sedan en (eller flera) inloggningar för familjen under **Admin UI → Collections → users → New record** (inte admin-kontot — det är bara för att administrera servern, appen loggar in med en vanlig `users`-post).
+Skapa sedan en (eller flera) inloggningar för familjen under **Admin UI → Collections → users → New record** (inte superuser-kontot — appen loggar in med en vanlig `users`-post).
 
 ## Schemadesign i korthet
 
@@ -31,3 +34,4 @@ Skapa sedan en (eller flera) inloggningar för familjen under **Admin UI → Col
 - Alla `number | null`-fält (t.ex. parasitvärden, slaktvikt) lagras som **text**, inte PocketBases nummerfälttyp — annars gör PocketBase om ett tomt värde till `0`, vilket gör "inget värde" och "värdet är faktiskt 0" omöjliga att skilja åt. Appen konverterar till/från tal vid synk.
 - Korsreferenser mellan tabeller (t.ex. `animal_id`) är vanliga textfält med appens UUID, inte PocketBases relationsfälttyp — appen känner bara till sina egna ID:n, inte PocketBases interna.
 - Behörighet: vem som helst som är inloggad får läsa/skriva allt (`@request.auth.id != ''`). Det är avsiktligt enkelt eftersom servern är till för en enskild gårds betrodda användare, inte en flergårdstjänst.
+- Varje tabell har explicita `created`/`updated`-fält (typ `autodate`). De läggs inte till automatiskt av PocketBase i den här versionen — appens synk är beroende av `updated` för att effektivt avgöra vad som är nytt sedan sist, så en eventuell ny tabell måste ha båda fälten för att synkas korrekt.

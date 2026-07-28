@@ -14,11 +14,13 @@ Det här är fas 5b: flera personer på gården ska kunna se och redigera samma 
 
 ## 2. Installera PocketBase på serverenheten
 
+Migrationerna i repot (`server/pb_migrations/`) är skrivna för **PocketBase v0.39.x**. PocketBase har ibland ändrat migrations-API:t mellan större versioner — installera helst just v0.39.x för att slippa krångel; installerar du en nyare version och migrationerna inte verkar ta (`./pocketbase migrate up` säger "No new migrations" utan att skapa tabellerna), jämför `./pocketbase --version` mot [releaselistan](https://github.com/pocketbase/pocketbase/releases) och hör av dig så uppdaterar vi migrationerna.
+
 ```bash
 # Byt ut mot rätt version för din plattform (linux_arm64 för Raspberry Pi,
 # linux_amd64 för de flesta NAS/datorer) — se https://pocketbase.io/docs/
-curl -LO https://github.com/pocketbase/pocketbase/releases/download/v0.22.21/pocketbase_0.22.21_linux_arm64.zip
-unzip pocketbase_0.22.21_linux_arm64.zip
+curl -LO https://github.com/pocketbase/pocketbase/releases/download/v0.39.9/pocketbase_0.39.9_linux_arm64.zip
+unzip pocketbase_0.39.9_linux_arm64.zip
 ```
 
 Kopiera schemat från repot till samma mapp som `pocketbase`-programmet:
@@ -27,10 +29,10 @@ Kopiera schemat från repot till samma mapp som `pocketbase`-programmet:
 cp -r server/pb_migrations /sökväg/där/pocketbase/ligger/
 ```
 
-Skapa en administratör (det här är bara för att sköta servern — inte samma som familjens inloggningar):
+Skapa ett superuser-konto (det här är bara för att sköta servern via Admin UI — inte samma som familjens inloggningar):
 
 ```bash
-./pocketbase admin create din@epost.se DittAdminLösenord
+./pocketbase superuser upsert din@epost.se DittAdminLösenord
 ```
 
 ## 3. Kör servern som en tjänst (så den startar om automatiskt)
