@@ -4,7 +4,7 @@ Schemat för den självhostade synkservern. Se `../docs/synk.md` för fullständ
 
 ## Innehåll
 
-`pb_migrations/` — PocketBase-migrationer som skapar alla 15 datacollections (samma fält som appens lokala datamodell v2, se `../docs/arkitektur.md` §3). Läggs i PocketBase-installationens `pb_migrations`-mapp och körs automatiskt vid start (`--automigrate` är på som standard).
+`pb_migrations/` — PocketBase-migrationer som skapar alla 15 datacollections (samma fält som appens lokala datamodell, se `../docs/arkitektur.md` §3). Läggs i PocketBase-installationens `pb_migrations`-mapp och körs automatiskt vid start (`--automigrate` är på som standard).
 
 ## Snabbstart
 

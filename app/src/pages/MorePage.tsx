@@ -44,8 +44,8 @@ export default function MorePage() {
         <li>
           <Link to="/mer/import" className="card">
             <div className="card-main">
-              <span className="card-title">Importera från AppSheet</span>
-              <span className="card-meta">Engångsimport av din Excel-export — tas bort efter användning</span>
+              <span className="card-title">Importera från Excel</span>
+              <span className="card-meta">Engångsimport av en Excel-export — tas bort efter användning</span>
             </div>
           </Link>
         </li>

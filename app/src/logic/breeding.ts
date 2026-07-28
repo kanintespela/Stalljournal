@@ -1,8 +1,8 @@
 import { db, newId, nowIso } from '../db/db'
 import type { Mating, Sex } from '../db/types'
 
-// Use case: registrera lamning (ersätter AppSheet-boten "B0 skapa lamm vid lamning").
-// Skapar lamningsraden + en djurpost per levande lamm i EN transaktion:
+// Use case: registrera lamning. Skapar lamningsraden + en djurpost per
+// levande lamm i EN transaktion:
 // mor = tackan, far = baggen från senaste betäckning (om någon), födelsedatum =
 // lamningsdatum. Angiven födelsevikt blir en vägningsrad av typen "Födelsevikt".
 

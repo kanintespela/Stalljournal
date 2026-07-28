@@ -22,9 +22,9 @@ import type {
   Weighing,
 } from '../db/types'
 
-// Engångsimport från AppSheet-exporten (Google Sheets-arket exporterat som xlsx).
+// Engångsimport från det tidigare kalkylarksbaserade verktyget (xlsx-export).
 // Körs helt lokalt i webbläsaren: filen lämnar aldrig enheten, ingen data skickas
-// till någon server. Se docs/kartlaggning.md §2 för den ursprungliga datamodellen.
+// till någon server.
 
 export interface ImportPlan {
   animals: Animal[]
@@ -99,7 +99,7 @@ function toIsoDate(v: unknown): string | null {
   const mdy = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/)
   if (mdy) {
     let [, a, b, y] = mdy
-    // AppSheet exporterar med amerikanskt format MM/DD/ÅÅÅÅ; om första talet >12 är det ändå dag.
+    // Källfilen kan ha amerikanskt datumformat MM/DD/ÅÅÅÅ; om första talet >12 är det ändå dag.
     if (Number(a) > 12) [a, b] = [b, a]
     return `${y}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`
   }
@@ -196,7 +196,7 @@ export function buildImportPlan(wb: XLSX.WorkBook): ImportPlan {
   }
 
   // mor_id/far_id kan i praktiken innehålla antingen id_djur eller märkning
-  // (AppSheet-fältet far_id är fritext) — bygg en slagning på båda.
+  // (far_id är fritext i källfilen) — bygg en slagning på båda.
   const tagIdMap = new Map<string, string>()
   for (const r of djurRows) {
     const key = normKey(r.id_djur)

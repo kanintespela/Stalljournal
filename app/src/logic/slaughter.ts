@@ -2,9 +2,8 @@ import { db, newId, nowIso } from '../db/db'
 import type { Slaughter, Treatment } from '../db/types'
 import { withdrawalUntil } from '../db/types'
 
-// Use case: slakt (ersätter AppSheet-boten "B_Slakt_Add").
-// När en slakt registreras som genomförd: djuret markeras som slaktat
-// (status + utgångsdatum) och djurets öppna gruppmedlemskap avslutas.
+// Use case: slakt. När en slakt registreras som genomförd markeras djuret
+// som slaktat (status + utgångsdatum) och dess öppna gruppmedlemskap avslutas.
 
 export type SlaughterInput = Omit<Slaughter, 'id' | 'updated_at' | 'deleted_at'>
 

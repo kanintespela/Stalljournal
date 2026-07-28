@@ -54,9 +54,9 @@ export default function ImportPage() {
       <header className="page-header">
         <Link to="/mer" className="back">‹ Mer</Link>
       </header>
-      <h1>Importera från AppSheet</h1>
+      <h1>Importera från Excel</h1>
       <p className="muted">
-        Läser din exporterade Excel-fil (djur.xlsx) och fyller den lokala databasen. Filen bearbetas
+        Läser en exporterad Excel-fil (djur.xlsx) och fyller den lokala databasen. Filen bearbetas
         helt i webbläsaren — inget skickas till någon server.
       </p>
 
