@@ -32,8 +32,8 @@ export default function GrowthComparisonPage() {
         Jämför tillväxt (g/dag) mellan djur i samma åldersfönster, korrigerat för kullstorlek — ett djur jämförs
         bara mot andra ensamfödda, tvillingar respektive trillingar+, eftersom konkurrensen om di/foder annars
         gör talen missvisande. Metoden är en kontemporärgruppsjämförelse (djurets tillväxt delat med gruppens
-        medeltillväxt) — enklare än BLUP och kräver ingen data från andra besättningar, men är bara en jämförelse
-        inom din egen besättning.
+        medeltillväxt) — den kräver ingen data från andra besättningar, men är bara en jämförelse inom din egen
+        besättning.
       </p>
 
       <div className="toolbar">

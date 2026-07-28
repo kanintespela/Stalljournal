@@ -1,13 +1,12 @@
 import { db } from '../db/db'
 import type { Animal } from '../db/types'
 
-// Tillväxtjämförelse korrigerad för kullstorlek — se docs/avel.md §5.
+// Tillväxtjämförelse korrigerad för kullstorlek — se docs/avel.md §2.
 // Metoden är en kontemporärgruppsjämförelse: djurets tillväxt (g/dag) i ett
 // åldersfönster jämförs mot medeltillväxten för andra djur i SAMMA
 // kullstorlekskategori (konkurrensen om di/foder påverkar tillväxten mycket).
-// Det är en äldre, enklare teknik än BLUP som inte kräver data från andra
-// besättningar — men den är bara en jämförelse inom den egna besättningen,
-// inte ett avelsvärde.
+// Kräver ingen data från andra besättningar, men är bara en jämförelse inom
+// den egna besättningen, inte ett avelsvärde.
 
 export type LitterSizeCategory = 1 | 2 | 3
 

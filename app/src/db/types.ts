@@ -227,7 +227,7 @@ export interface AnimalPhoto extends BaseRow {
   height: number
 }
 
-// Egna, fritt definierade egenskaper för avelsarbete (se docs/avel.md §4).
+// Egna, fritt definierade egenskaper för avelsarbete (se docs/avel.md §2).
 // Användaren definierar själv vilka egenskaper som är intressanta att följa
 // (temperament, exteriör, ullfällning m.m.) istället för en fast lista.
 export type TraitDirection = 'higher_better' | 'lower_better' | 'target'

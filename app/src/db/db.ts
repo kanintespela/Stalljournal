@@ -68,7 +68,7 @@ export class StalljournalDB extends Dexie {
     this.version(2).stores({
       animal_photos: 'id, animal_id, taken_on, updated_at',
     })
-    // v3: fritt definierade avelsegenskaper (se docs/avel.md §4).
+    // v3: fritt definierade avelsegenskaper (se docs/avel.md §2).
     this.version(3).stores({
       traits: 'id, name, active, updated_at',
       trait_records: 'id, trait_id, animal_id, date, updated_at',

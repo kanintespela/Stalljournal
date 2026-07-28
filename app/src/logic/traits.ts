@@ -9,7 +9,7 @@ export interface SuggestedTrait {
   description: string
 }
 
-// Förslag på egenskaper kopplade till avelsmålen i docs/avel.md §5 — bara
+// Förslag på egenskaper kopplade till avelsmålen i docs/avel.md §2 — bara
 // utgångspunkter att fylla i och spara, inte fasta fält.
 export const SUGGESTED_TRAITS: SuggestedTrait[] = [
   {

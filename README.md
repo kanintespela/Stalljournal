@@ -9,7 +9,7 @@ En digital stalljournal för fårproducenter — ett verktyg för att hålla red
 - [`docs/domanoversikt.md`](docs/domanoversikt.md) — vad appen gör och varför
 - [`docs/arkitektur.md`](docs/arkitektur.md) — hur appen är byggd tekniskt
 - [`docs/synk.md`](docs/synk.md) — sätta upp delad data mellan flera användare
-- [`docs/avel.md`](docs/avel.md) — undersökning och plan för avelsarbete/BLUP
+- [`docs/avel.md`](docs/avel.md) — egna avelsegenskaper och tillväxtjämförelse
 - [`app/README.md`](app/README.md) — utveckling och byggstatus
 - [`server/README.md`](server/README.md) — synkservern
 
