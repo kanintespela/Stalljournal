@@ -15,6 +15,8 @@ import type {
   Slaughter,
   Slaughterhouse,
   SlaughterSettlement,
+  Trait,
+  TraitRecord,
   Treatment,
   Weighing,
 } from './types'
@@ -39,6 +41,8 @@ export class StalljournalDB extends Dexie {
   slaughter_settlements!: Table<SlaughterSettlement, string>
   app_settings!: Table<AppSetting, string>
   animal_photos!: Table<AnimalPhoto, string>
+  traits!: Table<Trait, string>
+  trait_records!: Table<TraitRecord, string>
 
   constructor() {
     super('stalljournal')
@@ -63,6 +67,11 @@ export class StalljournalDB extends Dexie {
     // v2: foton kopplade till djur (lokal lagring, se docs/avel.md).
     this.version(2).stores({
       animal_photos: 'id, animal_id, taken_on, updated_at',
+    })
+    // v3: fritt definierade avelsegenskaper (se docs/avel.md §4).
+    this.version(3).stores({
+      traits: 'id, name, active, updated_at',
+      trait_records: 'id, trait_id, animal_id, date, updated_at',
     })
   }
 }

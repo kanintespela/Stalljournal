@@ -226,3 +226,31 @@ export interface AnimalPhoto extends BaseRow {
   width: number
   height: number
 }
+
+// Egna, fritt definierade egenskaper för avelsarbete (se docs/avel.md §4).
+// Användaren definierar själv vilka egenskaper som är intressanta att följa
+// (temperament, exteriör, ullfällning m.m.) istället för en fast lista.
+export type TraitDirection = 'higher_better' | 'lower_better' | 'target'
+
+export const TRAIT_DIRECTION_LABELS: Record<TraitDirection, string> = {
+  higher_better: 'Högre värde är bättre',
+  lower_better: 'Lägre värde är bättre',
+  target: 'Ett målvärde är bäst (inte för högt eller lågt)',
+}
+
+export interface Trait extends BaseRow {
+  name: string
+  unit: string
+  direction: TraitDirection
+  target_value: number | null
+  description: string
+  active: boolean
+}
+
+export interface TraitRecord extends BaseRow {
+  trait_id: string
+  animal_id: string
+  date: string
+  value: number
+  note: string
+}

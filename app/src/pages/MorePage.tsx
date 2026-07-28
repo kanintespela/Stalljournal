@@ -31,6 +31,22 @@ export default function MorePage() {
           </Link>
         </li>
         <li>
+          <Link to="/mer/egenskaper" className="card">
+            <div className="card-main">
+              <span className="card-title">Avelsegenskaper</span>
+              <span className="card-meta">Registrera och jämför egna egenskaper — temperament, exteriör, ullfällning m.m.</span>
+            </div>
+          </Link>
+        </li>
+        <li>
+          <Link to="/mer/tillvaxt" className="card">
+            <div className="card-main">
+              <span className="card-title">Tillväxtjämförelse</span>
+              <span className="card-meta">Tillväxt (g/dag) korrigerad för kullstorlek</span>
+            </div>
+          </Link>
+        </li>
+        <li>
           <Link to="/mer/synk" className="card">
             <div className="card-main">
               <span className="card-title">Synkronisering</span>

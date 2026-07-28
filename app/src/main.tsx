@@ -20,6 +20,9 @@ import BodyConditionFormPage from './pages/BodyConditionFormPage'
 import ParasiteSampleFormPage from './pages/ParasiteSampleFormPage'
 import FeedingFormPage from './pages/FeedingFormPage'
 import MorePage from './pages/MorePage'
+import TraitsPage from './pages/TraitsPage'
+import TraitDetailPage from './pages/TraitDetailPage'
+import GrowthComparisonPage from './pages/GrowthComparisonPage'
 import SlaughtersPage from './pages/SlaughtersPage'
 import SlaughterFormPage from './pages/SlaughterFormPage'
 import SlaughterhousesPage from './pages/SlaughterhousesPage'
@@ -72,6 +75,9 @@ const router = createBrowserRouter([
       { path: 'mer/rapport', element: <AnnualReportPage /> },
       { path: 'mer/import', element: <Suspense fallback={null}><ImportPage /></Suspense> },
       { path: 'mer/synk', element: <SyncPage /> },
+      { path: 'mer/egenskaper', element: <TraitsPage /> },
+      { path: 'mer/egenskaper/:id', element: <TraitDetailPage /> },
+      { path: 'mer/tillvaxt', element: <GrowthComparisonPage /> },
     ],
   },
 ], { basename })

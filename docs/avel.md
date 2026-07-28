@@ -1,8 +1,10 @@
-# Stalljournal — avelsarbete och BLUP: undersökning och plan
+# Stalljournal — avelsarbete: undersökning och byggd funktionalitet
 
 ## 1. Sammanfattning
 
-Kan appen breddas till avelsarbete? **Ja, och mycket av grundarbetet finns redan** (härstamning, vägningar, kullstorlek, slaktresultat). Men den viktigaste frågan — att själv beräkna BLUP-avelsvärden i appen — har ett rakt svar efter research: **det går inte att göra meningsfullt på en enskild besättnings data**, oavsett hur bra appen byggs. Skälet finns i §2. Planen i §5 lägger därför upp två separata spår: dels göra appens registreringar redo för export till Elitlamm (vägen till riktiga, jämförbara avelsvärden), dels en enklare "besättningsindex"-funktion som kan byggas i appen men som måste hållas tydligt åtskild från ett riktigt avelsvärde.
+Kan appen breddas till avelsarbete? **Ja.** Den viktigaste frågan från början — att själv beräkna BLUP-avelsvärden i appen — har ett rakt svar efter research: **det går inte att göra meningsfullt på en enskild besättnings data**, oavsett hur bra appen byggs (skälet finns i §2, oförändrat sedan första undersökningen). Elitlamm har dessutom ingen dokumenterad öppen import/export för tredjepartsverktyg (§3), så vägen dit är stängd tills vidare.
+
+Efter det beskedet blev slutsatsen (bekräftad i samtal): sikta inte på att efterlikna Elitlamms fasta mönstringsfält. Bygg istället ett **enkelt, flexibelt verktyg där du själv definierar vilka egenskaper som är intressanta** för just din avel — temperament, exteriör, ullfällning, vuxenvikt, eller vad som helst du kommer på senare — och en **ärlig jämförelse** av dem inom den egna besättningen, tydligt märkt som just det: en jämförelse, inte ett avelsvärde. Med en liten besättning är osäkerheten alltid stor, så verktyget ska aldrig ge sken av högre precision än det har täckning för. §4 beskriver vad som är byggt.
 
 ## 2. Varför BLUP inte kan räknas fram lokalt i appen
 
@@ -21,48 +23,41 @@ Detta gäller alla verktyg (BLUPF90, DMU, WOMBAT, R-paket som `sommer`/`nadiv`) 
 
 Elitlamm är både gårdsprogram **och** Sveriges officiella stambok/register för fåravel, ägt av Svenska Fåravelsförbundet. Registrering sker direkt i Elitlamm (webb eller appen Elitlamm Puls) — det finns **ingen dokumenterad öppen import-API** som tredjepartsappar kan koppla mot. Strikta tidsgränser gäller: lamning ska registreras inom 3 månader, mönstring (~110 dagar) inom 3 månader, och grunddata (härstamning, födelsedatum, födelsevikt, 60-dagarsvikt) måste finnas registrerad *innan* mönstringen. Slaktdata kan i vissa fall hämtas automatiskt från slakteri (KLS Ugglarps).
 
-**Öppen fråga jag inte kan besvara själv:** om Elitlamm har någon odokumenterad möjlighet till filimport eller ett samarbete för tredjepartsverktyg. Det enda sättet att få ett säkert svar är att fråga `support@elitlamm.com` direkt — det är en sak bara du kan göra, och svaret avgör om export blir en fil du laddar upp eller bara ett underlag du matar in för hand.
+**Öppen fråga:** om Elitlamm har någon odokumenterad möjlighet till filimport eller ett samarbete för tredjepartsverktyg. Det enda sättet att få ett säkert svar är att fråga `support@elitlamm.com` direkt — se §6.
 
-## 4. Vad appen redan har och vad som saknas
+## 4. Vad som är byggt
 
-| Elitlamm-egenskap | Status i appen idag |
-|---|---|
-| Härstamning (mor/far, ras) | ✅ Finns (`mother_id`, `father_id`, `breed`) |
-| Kullstorlek vid lamning | ✅ Finns (`lambing.live_count`/`dead_count`) |
-| Födelsevikt | ✅ Finns (registreras som vägning av typen "Födelsevikt" vid lamning) |
-| 60-dagarsvikt | 🟡 Går att registrera som vägning, men inget strukturerat stöd — ingen påminnelse, ingen tydlig koppling till Elitlamms 40–80-dagarsfönster |
-| Mönstring (110 dagar): vikt | 🟡 Går att registrera som vägning, samma begränsning som ovan |
-| Mönstring: formklass (kroppskonformation) | ❌ Finns inte — appens "hull"-poäng (1–5, foderstatus) är en annan sak än Elitlamms formklass |
-| Pälsbedömning (gotlandsfår m.fl.) | ❌ Finns inte |
-| Ullbedömning (finull, rya) | ❌ Finns inte |
-| Slaktresultat (vikt, EUROP-klass, fettgrupp) | ✅ Finns redan väl utbyggt (`slaughters`) |
-| Foton av djur (för exteriörbedömning) | ✅ Byggt (denna omgång) |
-| Rasstandardiserade rasnamn | 🟡 Fritextfält idag — Elitlamm avelsvärderar bara 10 specifika raser |
+### Foton
+Djur kan få flera foton kopplade till sig, komprimerade och lagrade lokalt. Används för att följa exteriör och andra synliga egenskaper visuellt över tid (djurdetaljvyn).
 
-Bilden är alltså bra: det mesta av grunddatan finns redan eller är enkel att lägga till. Det som helt saknas är mönstringens form-/päls-/ullbedömning, som är specifika bedömningsformulär appen inte har byggt än.
+### Egna avelsegenskaper (Mer → Avelsegenskaper)
+Fri, användardefinierad egenskapstyp — inte en fast Elitlamm-lik lista. Varje egenskap har namn, enhet, riktning (högre/lägre är bättre, eller ett målvärde), och en fritextbeskrivning för att skriva ner ett eget testprotokoll. Fyra förslag finns färdiga att fylla i och justera:
 
-## 5. Föreslagen plan (faser)
+- **Temperament (rädsla för människor)** — ett enkelt närmandetest, poäng 1–5.
+- **Exteriör – helhetsintryck** — övergripande kroppsbedömning, poäng 1–5.
+- **Ullfällning (självfällning)** — relevant vid Dorper-inkorsning, poäng 1–5.
+- **Vuxenvikt** — med målvärde istället för "mer/mindre är bättre", eftersom varken för stora eller för små djur är önskvärt.
 
-### Fas 1 — Foton (klart denna omgång)
-Djur kan nu få flera foton kopplade till sig, komprimerade och lagrade lokalt. Direkt användbart för exteriörbedömning ("kräver ett erfaret öga", enligt Fåravelsförbundets material) och för att följa ett djur visuellt över tid.
+Värden registreras per djur (från djurkortet) och varje egenskap har en egen sida med rangordning av senast registrerade värde per djur. Rangordningen visar en tydlig varning när färre än tre djur är registrerade, eftersom jämförelsen då är särskilt osäker.
 
-### Fas 2 — Strukturera mönstring och tillväxtmätning (näst högst prioritet)
-- Lägg till 60-dagarsvikt som en egen, igenkänd vägningstyp med automatisk påminnelse (djur födda för 55–65 dagar sedan utan registrerad 60-dagarsvägning listas).
-- Samma för mönstring vid ~110 dagar.
-- Nytt registreringsformulär **Mönstring** (separat från dagens fria "hull"-registrering): formklass, ev. pälsbedömning (färgnyans, färgpoäng, lockstorlek m.fl. för gotlandsfår/leicester) och ullbedömning (finull/rya) — fälten aktiveras beroende på djurets ras.
-- Rasfält blir en väljare med Elitlamms tio avelsvärderade raser + "annan/blandras", istället för fritext.
+### Tillväxtjämförelse, korrigerad för kullstorlek (Mer → Tillväxtjämförelse)
+Svarar direkt på frågan "hur skapar man jämförbara tillväxtvärden?". Metoden är en **kontemporärgruppsjämförelse**: en äldre, enklare teknik än BLUP som använts internationellt för fårproduktion innan/vid sidan av BLUP, och som inte kräver data från andra besättningar.
 
-### Fas 3 — Elitlamm-redo export
-- Exportfunktion (Excel/CSV) formaterad efter vad Elitlamm förväntar sig vid registrering, så uppgifterna som redan finns i Stalljournal kan matas in eller laddas upp där (beroende på svaret från support@elitlamm.com).
-- Påminnelser i appen för Elitlamms 3-månadersgränser för lamning och mönstring.
+Så fungerar den:
+1. Djuret grupperas efter kullstorlek vid födsel (ensamfödd / tvilling / trilling eller fler), hämtat från lamningsregistreringen — konkurrensen om di och foder skiljer sig mycket mellan de grupperna, så det är den korrigeringen som gör tillväxtsiffror jämförbara.
+2. Tillväxten (gram/dag) räknas ut mellan två vägningar inom ett valbart åldersfönster (dagar sedan födsel) — förvalda genvägar finns för digiperiod (dag 0–60) och grovfoderperiod (dag 60–150), men fönstret går att justera fritt.
+3. Djurets tillväxt jämförs mot medeltillväxten för andra djur i samma kullstorlekskategori och period, som en procentandel av gruppsnittet.
+4. Grupper med färre än tre djur märks tydligt som osäkra.
 
-### Fas 4 — Besättningsindex (sekundärt, tydligt separerat från avelsvärde)
-En enklare, egen ranking av besättningens djur baserad på korrigerade mönstringsvikter och kullstorlek, med fasta arvbarhetsvärden hämtade från forskningslitteraturen per ras. **Måste visas med en helt annan skala och tydlig text** ("Besättningsindex — inte samma sak som Elitlamms avelsvärde") för att aldrig kunna förväxlas med ett riktigt avelsvärde. Nyttan är begränsad till att rangordna de egna djuren inbördes — inte jämförbar mellan besättningar. Lägre prioritet än fas 2–3 eftersom den faktiska nyttan för en liten besättning är osäker (se §2).
+Detta ersätter det tidigare planerade spåret med Elitlamm-lika mönstringsfält (formklass/päls/ull vid ~110 dagar) — de fälten byggs inte, eftersom du efter research bedömde att ett friare, egendefinierat verktyg passar bättre för en liten besättning med egna avelsmål.
 
-### Fas 5 — Riktiga avelsvärden i appen (villkorat)
-Om svaret från Elitlamm-supporten visar att det finns någon form av datautbyte, kan importerade avelsvärden visas som skrivskyddade fält på djurkortet (hämtade från Elitlamms halvårsvisa publicering) — då slipper man hoppa mellan två system för att se värdena. Utan ett sådant utbyte stannar detta vid manuell avstämning.
+## 5. Kvarstående, lägre prioriterat
+
+- **Elitlamm-redo export:** om det visar sig finnas ett sätt att skicka data till Elitlamm (se §6), kan en exportfunktion byggas som formaterar det appen redan har (härstamning, vikter, kullstorlek, slaktresultat) enligt vad Elitlamm förväntar sig.
+- **Riktiga avelsvärden i appen:** om ett sådant datautbyte finns, kan Elitlamms halvårsvis publicerade avelsvärden visas som skrivskyddade fält på djurkortet. Utan det stannar det vid manuell avstämning i Elitlamm/Elitlamm Puls.
+
+Båda punkterna är villkorade av svaret från Elitlamm-supporten och görs bara om det blir aktuellt.
 
 ## 6. Vad jag behöver av dig
 
-1. **Maila support@elitlamm.com** och fråga om det finns någon dokumenterad import/export eller samarbetsmöjlighet för tredjepartsverktyg som Stalljournal. Svaret avgör om fas 3 blir en fil att ladda upp eller bara ett tydligt formaterat underlag.
-2. **Bekräfta prioritering:** vill du att jag börjar med fas 2 (strukturerad mönstring/60-dagarsvikt) nu, eller ska jag invänta svaret från Elitlamm först ifall det påverkar vilka fält som behövs?
+**Maila support@elitlamm.com** och fråga om det finns någon dokumenterad import/export eller samarbetsmöjlighet för tredjepartsverktyg som Stalljournal — det är fortfarande den enda öppna frågan, och bara du kan skicka den mailen. Svaret avgör om §5 någonsin blir aktuellt.

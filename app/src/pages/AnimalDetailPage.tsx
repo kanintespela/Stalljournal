@@ -6,6 +6,7 @@ import { ANIMAL_STATUS_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUn
 import { groupsForAnimal } from '../logic/herd'
 import { activePregnancy } from '../logic/breeding'
 import PhotoGallery from '../components/PhotoGallery'
+import AnimalTraits from '../components/AnimalTraits'
 
 const WeightChart = lazy(() => import('../components/WeightChart'))
 
@@ -240,6 +241,8 @@ export default function AnimalDetailPage() {
           </ul>
         </section>
       )}
+
+      <AnimalTraits animalId={animal.id} />
 
       <section className="section">
         <h2>Behandlingar {treatments && treatments.length > 0 && `(${treatments.length})`}</h2>
