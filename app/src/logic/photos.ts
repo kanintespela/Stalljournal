@@ -1,9 +1,10 @@
 import { db, newId, nowIso } from '../db/db'
 import type { AnimalPhoto } from '../db/types'
 
-// Foton lagras lokalt i IndexedDB som komprimerade JPEG-blobbar. Originalbilder
-// från telefonkameror är ofta 3-8 MB; det skulle snabbt fylla lagringsutrymmet
-// och göra synk tung (foton synkas inte alls ännu, se docs/avel.md).
+// Foton lagras lokalt i IndexedDB som komprimerade JPEG-blobbar och synkas till
+// servern (animal_photos, se sync/sync.ts). Originalbilder från telefonkameror
+// är ofta 3-8 MB; det skulle snabbt fylla lagringsutrymmet och göra synken tung,
+// så vi skalar ner och komprimerar innan bilden ens sparas lokalt.
 const MAX_DIMENSION = 1600
 const JPEG_QUALITY = 0.82
 

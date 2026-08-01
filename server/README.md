@@ -4,7 +4,9 @@ Schemat för den självhostade synkservern. Se `../docs/synk.md` för fullständ
 
 ## Innehåll
 
-`pb_migrations/` — PocketBase-migrationer som skapar alla 15 datacollections (samma fält som appens lokala datamodell, se `../docs/arkitektur.md` §3). Läggs i PocketBase-installationens `pb_migrations`-mapp och körs automatiskt vid start (`--automigrate` är på som standard).
+`pb_migrations/` — PocketBase-migrationer som skapar alla 16 datacollections (samma fält som appens lokala datamodell, se `../docs/arkitektur.md` §3, plus `animal_photos` för djurfoton). Läggs i PocketBase-installationens `pb_migrations`-mapp och körs automatiskt vid start (`--automigrate` är på som standard).
+
+Kör du redan en server sedan tidigare räcker det att kopiera in den nya migrationsfilen (`*_created_animal_photos.js`) och starta om — PocketBase kör bara de migrationer som inte redan applicerats.
 
 ## Snabbstart
 
@@ -35,3 +37,4 @@ Skapa sedan en (eller flera) inloggningar för familjen under **Admin UI → Col
 - Korsreferenser mellan tabeller (t.ex. `animal_id`) är vanliga textfält med appens UUID, inte PocketBases relationsfälttyp — appen känner bara till sina egna ID:n, inte PocketBases interna.
 - Behörighet: vem som helst som är inloggad får läsa/skriva allt (`@request.auth.id != ''`). Det är avsiktligt enkelt eftersom servern är till för en enskild gårds betrodda användare, inte en flergårdstjänst.
 - Varje tabell har explicita `created`/`updated`-fält (typ `autodate`). De läggs inte till automatiskt av PocketBase i den här versionen — appens synk är beroende av `updated` för att effektivt avgöra vad som är nytt sedan sist, så en eventuell ny tabell måste ha båda fälten för att synkas korrekt.
+- `animal_photos` är undantaget: fältet `photo` är ett riktigt PocketBase-filfält (max 8 MB, bara `image/jpeg`) istället för ett textfält, eftersom det faktiskt lagrar bilddata, inte bara en sökväg. Filerna hamnar under `pb_data/storage/` och ingår i den vanliga backup-rutinen (se `../docs/synk.md` §8) — se dock till att det finns tillräckligt med diskutrymme, eftersom foton normalt är mycket större än övrig data.

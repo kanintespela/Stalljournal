@@ -7,6 +7,8 @@
 
 **Revision 3 (2026-07-27):** Backend ändrat från Supabase (moln) till **självhostad PocketBase + Tailscale**, på appägarens egen begäran — man har hårdvara hemma som kan stå på och vill inte vara beroende av en molnleverantör. Se `docs/synk.md` för installationsguide. Synklogiken (push/pull, last-write-wins) är oförändrad i sak; bara var servern körs har ändrats.
 
+**Revision 4 (2026-08-01):** Djurfoton (`animal_photo`) synkas nu också, via ett PocketBase-filfält i en ny collection (`animal_photos`). Tidigare lagrades foton bara lokalt i IndexedDB, vilket gjorde att bilder tagna på en enhet inte syntes på andras — allt annat synkades men inte foton. Synkmotorn hanterar filen separat från de vanliga JSON-tabellerna (multipart-uppladdning vid nyskapande, autentiserad nedladdning via engångstoken vid hämtning) eftersom PocketBases generiska JSON-baserade push/pull inte hanterar binärdata.
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -89,6 +91,7 @@ lambing(id, ewe_id→animal, date, live_count, dead_count, note)
 mating(id, ewe_id→animal, ram_id→animal, start_date, end_date)
           -- beräknad lamning = start_date + 147 dagar: BERÄKNAS
 body_condition(id, animal_id→animal, date, score, note, photo_path)
+animal_photo(id, animal_id→animal, taken_on, note, photo [fil], width, height)
 parasite_sample(id, date, animal_id?→animal, group_id?→herd_group, type,
                 result, note, file_path, trichostrongylida, haemonchus_pct,
                 t_axei_pct, chab_oes, n_filaria, n_spathiger, n_battus, capillaria)

@@ -9,7 +9,7 @@ Med en liten besättning är osäkerheten i alla jämförelser alltid stor. Verk
 ## 2. Vad som är byggt
 
 ### Foton
-Djur kan få flera foton kopplade till sig, komprimerade och lagrade lokalt. Används för att följa exteriör och andra synliga egenskaper visuellt över tid (djurdetaljvyn).
+Djur kan få flera foton kopplade till sig, komprimerade och lagrade lokalt. Används för att följa exteriör och andra synliga egenskaper visuellt över tid (djurdetaljvyn). Fotona synkas till servern precis som övrig data (se `docs/synk.md`) så alla på gården ser samma bilder.
 
 ### Egna avelsegenskaper (Mer → Avelsegenskaper)
 Fri, användardefinierad egenskapstyp. Varje egenskap har namn, enhet, riktning (högre/lägre är bättre, eller ett målvärde), och en fritextbeskrivning för att skriva ner ett eget testprotokoll. Fyra förslag finns färdiga att fylla i och justera:
