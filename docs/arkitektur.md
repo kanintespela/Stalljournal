@@ -9,6 +9,8 @@
 
 **Revision 4 (2026-08-01):** Djurfoton (`animal_photo`) synkas nu också, via ett PocketBase-filfält i en ny collection (`animal_photos`). Tidigare lagrades foton bara lokalt i IndexedDB, vilket gjorde att bilder tagna på en enhet inte syntes på andras — allt annat synkades men inte foton. Synkmotorn hanterar filen separat från de vanliga JSON-tabellerna (multipart-uppladdning vid nyskapande, autentiserad nedladdning via engångstoken vid hämtning) eftersom PocketBases generiska JSON-baserade push/pull inte hanterar binärdata.
 
+**Revision 5 (2026-08-01):** Avelsegenskaperna (`trait`, `trait_record`, fas 6b) hade samma lucka som foton — lokala Dexie-tabeller utan motsvarande PocketBase-collection, och saknades i synkmotorns `TABLES`-lista. Åtgärdat på samma sätt som övriga JSON-tabeller (ingen binärdata inblandad här, så de följer det generiska push/pull-flödet direkt). Efter detta har all data i modellen utom `app_setting` (avsiktligt lokal enhetskonfiguration) en motsvarighet på servern och synkas.
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -106,10 +108,14 @@ slaughter_settlement(id, slaughter_id→slaughter, date, carcass_weight,
           grade, fat_class, price_per_kg, base_amount, adjustments,
           slaughter_fee, transport_fee, total, vat, net_total, file_path)
 
+trait(id, name, unit, direction, target_value, description, active)
+          -- se docs/avel.md §2 (fritt definierade avelsegenskaper)
+trait_record(id, trait_id→trait, animal_id→animal, date, value, note)
+
 app_setting(key, value)
 ```
 
-Alla tabeller får dessutom `updated_at` och `deleted_at` för synk (se §2). Servern (PocketBase) delas av alla på gården — det finns ingen gårds- eller kontoindelning i modellen, eftersom appen är byggd för en enskild gårds betrodda användare, inte som en flergårdstjänst.
+Alla tabeller ovan får dessutom `updated_at` och `deleted_at` och synkas mot servern (se §2 och `app/src/sync/sync.ts`). **Undantaget är `app_setting`**: rent lokal enhetskonfiguration (t.ex. importinställningar) utan `updated_at`/`deleted_at` — den är avsiktligt inte en del av datamodellen som delas mellan enheter. Servern (PocketBase) delas av alla på gården — det finns ingen gårds- eller kontoindelning i modellen, eftersom appen är byggd för en enskild gårds betrodda användare, inte som en flergårdstjänst.
 
 ### Designprinciper i datamodellen
 

@@ -63,6 +63,8 @@ const TABLES: TableSpec[] = [
     nullableText: ['file_path'],
     nullableNumber: ['carcass_weight', 'price_per_kg', 'base_amount', 'adjustments', 'slaughter_fee', 'transport_fee', 'total', 'vat', 'net_total'],
   },
+  { local: 'traits', collection: 'traits', nullableNumber: ['target_value'] },
+  { local: 'trait_records', collection: 'trait_records' },
 ]
 
 const PULL_WATERMARK_KEY = 'stalljournal_sync_pull'

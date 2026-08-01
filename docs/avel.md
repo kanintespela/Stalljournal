@@ -21,6 +21,8 @@ Fri, användardefinierad egenskapstyp. Varje egenskap har namn, enhet, riktning 
 
 Värden registreras per djur (från djurkortet) och varje egenskap har en egen sida med rangordning av senast registrerade värde per djur. Rangordningen visar en tydlig varning när färre än tre djur är registrerade, eftersom jämförelsen då är särskilt osäker.
 
+Både egenskaperna och de registrerade värdena synkas till servern, precis som övrig data.
+
 ### Tillväxtjämförelse, korrigerad för kullstorlek (Mer → Tillväxtjämförelse)
 Svarar på frågan "hur skapar man jämförbara tillväxtvärden?". Metoden är en **kontemporärgruppsjämförelse**, en enkel och beprövad teknik inom fårproduktion som inte kräver data från andra besättningar:
 

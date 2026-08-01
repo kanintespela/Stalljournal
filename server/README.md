@@ -4,9 +4,9 @@ Schemat för den självhostade synkservern. Se `../docs/synk.md` för fullständ
 
 ## Innehåll
 
-`pb_migrations/` — PocketBase-migrationer som skapar alla 16 datacollections (samma fält som appens lokala datamodell, se `../docs/arkitektur.md` §3, plus `animal_photos` för djurfoton). Läggs i PocketBase-installationens `pb_migrations`-mapp och körs automatiskt vid start (`--automigrate` är på som standard).
+`pb_migrations/` — PocketBase-migrationer som skapar alla 18 datacollections (samma fält som appens lokala datamodell, se `../docs/arkitektur.md` §3). Läggs i PocketBase-installationens `pb_migrations`-mapp och körs automatiskt vid start (`--automigrate` är på som standard).
 
-Kör du redan en server sedan tidigare räcker det att kopiera in den nya migrationsfilen (`*_created_animal_photos.js`) och starta om — PocketBase kör bara de migrationer som inte redan applicerats.
+Kör du redan en server sedan tidigare räcker det att kopiera in de nya migrationsfilerna (`*_created_animal_photos.js`, `*_created_traits.js`, `*_created_trait_records.js`) och starta om — PocketBase kör bara de migrationer som inte redan applicerats.
 
 ## Snabbstart
 
