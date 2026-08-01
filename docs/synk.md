@@ -91,9 +91,10 @@ Gör om samma sak på varje enhet som ska dela data. Appen synkar sedan automati
 ## 7. Hur synken fungerar (bra att veta)
 
 - **Appen fungerar offline precis som förut.** Servern behövs bara för att dela data mellan enheter — allt du gör i fält utan täckning sparas lokalt och synkas nästa gång du har nät.
+- **Djurfoton synkas också**, inte bara textdata — en bild som tas på en enhet dyker upp på de andra vid nästa synk. Bilder skalas ner och komprimeras innan de laddas upp, men är ändå störst av det som synkas — första synken efter att foton lagts till kan därför ta en stund om det finns många bilder sedan tidigare.
 - **Den som ändrar sist vinner** vid en verklig krock (samma djur redigerat på två enheter innan synk hunnit ske). Det är sällsynt i praktiken för en gårds storlek.
 - **Inget skickas till någon molntjänst.** All data går bara mellan dina enheter och din egen server, via Tailscales krypterade tunnel.
 
 ## 8. Säkerhetskopiering
 
-Allt ligger i mappen `pb_data` bredvid `pocketbase`-programmet. Säkerhetskopiera den mappen (t.ex. med samma backup-rutin du redan har för NAS:en, eller ett enkelt cron-jobb som kopierar den till en annan plats med jämna mellanrum). PocketBase har också en inbyggd backup-funktion i adminpanelen under **Settings → Backups**.
+Allt ligger i mappen `pb_data` bredvid `pocketbase`-programmet — inklusive djurfotona, som lagras som vanliga filer under `pb_data/storage/`. Säkerhetskopiera den mappen (t.ex. med samma backup-rutin du redan har för NAS:en, eller ett enkelt cron-jobb som kopierar den till en annan plats med jämna mellanrum). PocketBase har också en inbyggd backup-funktion i adminpanelen under **Settings → Backups**. Tänk på att `pb_data` växer betydligt snabbare när foton används — se till att enheten har gott om ledigt lagringsutrymme.
