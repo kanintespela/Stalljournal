@@ -1,4 +1,4 @@
-# Stalljournal — sätta upp delad data (flera användare, egen server)
+# Fri Stalljournal — sätta upp delad data (flera användare, egen server)
 
 Det här är fas 5b: flera personer på gården ska kunna se och redigera samma djur, grupper, journaler osv., samtidigt som appen fortsätter fungera offline i fält som idag.
 

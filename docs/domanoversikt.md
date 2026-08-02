@@ -1,4 +1,4 @@
-# Stalljournal — domänöversikt
+# Fri Stalljournal — domänöversikt
 
 Det här dokumentet beskriver **vad** Stalljournal behöver hålla reda på och **varför** — verksamheten hos en fårproducent, oberoende av hur appen är byggd tekniskt. Se `arkitektur.md` för den tekniska lösningen och den exakta datamodellen.
 

@@ -1,4 +1,4 @@
-# Stalljournal — Arkitektur och byggspec
+# Fri Stalljournal — Arkitektur och byggspec
 
 **Bygger på:** `docs/domanoversikt.md` (vad appen behöver göra och varför).
 **Princip:** Datamodellen och funktionerna är designade från grunden för att vara enkla att förstå och underhålla — inte begränsade av något tidigare verktyg.

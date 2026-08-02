@@ -1,4 +1,4 @@
-# Stalljournal — server (PocketBase)
+# Fri Stalljournal — server (PocketBase)
 
 Schemat för den självhostade synkservern. Se `../docs/synk.md` för fullständig installationsguide (PocketBase + Tailscale).
 

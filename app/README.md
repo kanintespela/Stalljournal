@@ -1,4 +1,4 @@
-# Stalljournal — PWA
+# Fri Stalljournal — PWA
 
 Offline-first webbapp (PWA) för fårproducenter. Se `../docs/domanoversikt.md` för vad appen gör och varför, `../docs/arkitektur.md` för den tekniska arkitekturen, och `../docs/synk.md` för att sätta upp delad data mellan flera användare.
 
