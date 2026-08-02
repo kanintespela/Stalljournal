@@ -41,13 +41,18 @@ export default function PlacesMap({ places, onSelect, height = 320 }: Props) {
     layer.clearLayers()
     const located = places.filter((p) => p.lat != null && p.lng != null)
     for (const p of located) {
+      // Tooltip-innehållet ges som ett DOM-element (inte en sträng) så Leaflet
+      // sätter det via textContent istället för innerHTML — annars kan ett
+      // platsnamn med HTML/script i sig köras som XSS i andra användares webbläsare.
+      const tooltipEl = document.createElement('span')
+      tooltipEl.textContent = p.name
       const marker = L.circleMarker([p.lat!, p.lng!], {
         radius: 10,
         color: '#3d5a3d',
         fillColor: '#3d5a3d',
         fillOpacity: 0.75,
       })
-        .bindTooltip(p.name, { permanent: false })
+        .bindTooltip(tooltipEl, { permanent: false })
         .addTo(layer)
       if (onSelect) marker.on('click', () => onSelect(p))
     }
