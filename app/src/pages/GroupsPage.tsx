@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
-import { activeMembersWithAnimals, daysBetween, openMove } from '../logic/herd'
+import { activeMembersWithAnimals, dagarText, daysBetween, openMove } from '../logic/herd'
 
 export default function GroupsPage() {
   const groups = useLiveQuery(async () => {
@@ -45,7 +45,7 @@ export default function GroupsPage() {
                   <span className="card-meta">
                     {count} djur
                     {placeName && ` · ${placeName}`}
-                    {days !== null && days > 0 && ` · ${days} dagar`}
+                    {days !== null && days > 0 && ` · ${dagarText(days)}`}
                   </span>
                 </div>
                 <div className="card-badges">

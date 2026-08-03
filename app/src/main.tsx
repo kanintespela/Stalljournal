@@ -1,6 +1,6 @@
-import { StrictMode, Suspense, lazy } from 'react'
+import { StrictMode, Suspense, lazy, type ComponentType } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, useParams } from 'react-router-dom'
 import App from './App'
 import AnimalsPage from './pages/AnimalsPage'
 import AnimalDetailPage from './pages/AnimalDetailPage'
@@ -52,6 +52,20 @@ const ImportPage = lazy(() => import('./pages/ImportPage'))
 // på GitHub Pages (/Stalljournal/)
 const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/'
 
+// Sidor under :id-rutter läser id via useLiveQuery/useEffect-beroenden. React
+// Router monterar INTE om komponenten bara för att :id ändras (samma routmönster,
+// samma komponenttyp) — den återanvänder instansen och uppdaterar bara params.
+// Det ger ett kort fönster (märktes ~100ms) där olika hooks i samma komponent
+// hinner olika långt i sin omkörning: en snabb .get(id)-fråga hinner visa nya
+// djurets namn medan en långsammare .where(...).equals(id)-fråga fortfarande
+// visar FÖREGÅENDE djurets relationer (fel förälder/avkomma/förflyttning tills
+// den hinner ikapp). key={id} tvingar React att avmontera och montera om hela
+// komponenten vid varje ny id, så alla hooks alltid startar om från noll.
+function KeyByParam({ Component }: { Component: ComponentType }) {
+  const { id } = useParams()
+  return <Component key={id} />
+}
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -60,18 +74,18 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <AnimalsPage /> },
       { path: 'djur/ny', element: <AnimalFormPage /> },
-      { path: 'djur/:id', element: <AnimalDetailPage /> },
-      { path: 'djur/:id/redigera', element: <AnimalFormPage /> },
+      { path: 'djur/:id', element: <KeyByParam Component={AnimalDetailPage} /> },
+      { path: 'djur/:id/redigera', element: <KeyByParam Component={AnimalFormPage} /> },
       { path: 'grupper', element: <GroupsPage /> },
       { path: 'grupper/ny', element: <GroupFormPage /> },
-      { path: 'grupper/:id', element: <GroupDetailPage /> },
-      { path: 'grupper/:id/redigera', element: <GroupFormPage /> },
-      { path: 'grupper/:id/medlemmar', element: <AddMembersPage /> },
-      { path: 'grupper/:id/flytta', element: <MoveGroupPage /> },
-      { path: 'grupper/:id/behandla', element: <GroupTreatmentPage /> },
+      { path: 'grupper/:id', element: <KeyByParam Component={GroupDetailPage} /> },
+      { path: 'grupper/:id/redigera', element: <KeyByParam Component={GroupFormPage} /> },
+      { path: 'grupper/:id/medlemmar', element: <KeyByParam Component={AddMembersPage} /> },
+      { path: 'grupper/:id/flytta', element: <KeyByParam Component={MoveGroupPage} /> },
+      { path: 'grupper/:id/behandla', element: <KeyByParam Component={GroupTreatmentPage} /> },
       { path: 'platser', element: <Suspense fallback={null}><PlacesPage /></Suspense> },
       { path: 'platser/ny', element: <Suspense fallback={null}><PlaceFormPage /></Suspense> },
-      { path: 'platser/:id/redigera', element: <Suspense fallback={null}><PlaceFormPage /></Suspense> },
+      { path: 'platser/:id/redigera', element: <Suspense fallback={null}><KeyByParam Component={PlaceFormPage} /></Suspense> },
       { path: 'journal', element: <JournalPage /> },
       { path: 'journal/vagning', element: <WeighingFormPage /> },
       { path: 'journal/behandling', element: <TreatmentFormPage /> },
@@ -85,14 +99,14 @@ const router = createBrowserRouter([
       { path: 'mer/gard', element: <FarmPage /> },
       { path: 'mer/slakt', element: <SlaughtersPage /> },
       { path: 'mer/slakt/ny', element: <SlaughterFormPage /> },
-      { path: 'mer/slakt/:id', element: <SlaughterFormPage /> },
+      { path: 'mer/slakt/:id', element: <KeyByParam Component={SlaughterFormPage} /> },
       { path: 'mer/slakterier', element: <SlaughterhousesPage /> },
       { path: 'mer/dokument', element: <DocumentsPage /> },
       { path: 'mer/rapport', element: <AnnualReportPage /> },
       { path: 'mer/import', element: <Suspense fallback={null}><ImportPage /></Suspense> },
       { path: 'mer/synk', element: <SyncPage /> },
       { path: 'mer/egenskaper', element: <TraitsPage /> },
-      { path: 'mer/egenskaper/:id', element: <TraitDetailPage /> },
+      { path: 'mer/egenskaper/:id', element: <KeyByParam Component={TraitDetailPage} /> },
       { path: 'mer/tillvaxt', element: <GrowthComparisonPage /> },
     ],
   },

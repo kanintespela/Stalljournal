@@ -89,6 +89,11 @@ export function daysBetween(from: string, to: string | null): number {
   return Math.max(0, Math.round((b.getTime() - a.getTime()) / 86_400_000))
 }
 
+/** "1 dag" / "2 dagar" — svensk pluralböjning. */
+export function dagarText(n: number): string {
+  return `${n} ${n === 1 ? 'dag' : 'dagar'}`
+}
+
 /** Djurets aktiva gruppmedlemskap. */
 export async function groupsForAnimal(animalId: string) {
   const ms = await db.group_memberships.where('animal_id').equals(animalId).toArray()

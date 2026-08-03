@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso, todayStr } from '../db/db'
-import { activeMembersWithAnimals, daysBetween, endMembership, openMove } from '../logic/herd'
+import { activeMembersWithAnimals, dagarText, daysBetween, endMembership, openMove } from '../logic/herd'
 
 export default function GroupDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -63,7 +63,7 @@ export default function GroupDetailPage() {
         {!group.active && <span className="badge">Inaktiv</span>}
         {place && (
           <span className="badge">
-            {place.name}{move && ` · ${daysBetween(move.moved_on, null)} dagar`}
+            {place.name}{move && ` · ${dagarText(daysBetween(move.moved_on, null))}`}
           </span>
         )}
       </p>
@@ -108,7 +108,7 @@ export default function GroupDetailPage() {
             {history.map(({ move: m, placeName }) => (
               <li key={m.id}>
                 {m.moved_on} → <strong>{placeName}</strong>
-                {' '}({daysBetween(m.moved_on, m.ended_on)} dagar{m.ended_on ? '' : ', pågår'})
+                {' '}({dagarText(daysBetween(m.moved_on, m.ended_on))}{m.ended_on ? '' : ', pågår'})
                 {m.note && <span className="muted"> — {m.note}</span>}
               </li>
             ))}
