@@ -51,6 +51,9 @@ Varje djur registreras med märkning, eventuellt SE-nummer, namn, kön, ras och 
 ### Grupper och platser
 Djur organiseras i grupper som flyttas mellan platser. Varje flytt registreras med datum, och den tidigare placeringens sluttid sätts automatiskt när en ny flytt sker — man ska aldrig manuellt behöva "stänga" en gammal placering. Det ger både en korrekt bild av var varje grupp befinner sig just nu, och en historik för hur länge olika beten utnyttjats (betesdagar).
 
+### Förflyttningar till/från anläggningen
+Utöver flyttar mellan egna platser (se ovan) registreras även när ett enskilt djur lämnar eller kommer till anläggningen — sålt till eller köpt från en annan besättning, skickat till slakteri, eller hämtat av en transportör. Varje sådan händelse registreras med datum, riktning (in/ut), djurets identitet och motpartens SE-nummer eller registreringsnummer (den mottagande/avsändande anläggningen, slakteriet eller transportören). Det är ett uttryckligt krav enligt EU:s djurhälsolag (AHL) och Jordbruksverkets föreskrifter — stalljournalen ska möjliggöra snabb smittspårning vid ett sjukdomsutbrott, och förflyttningshistoriken är den del som är svårast att rekonstruera i efterhand om den inte förs löpande. Registreringen är fristående journalföring, precis som behandlingar och vägningar — den ändrar inte automatiskt djurets Ingång/Utgång-fält på djurkortet.
+
 ### Lamning
 När en lamning registreras (tacka, datum, antal levande/döda lamm) skapas automatiskt en ny djurpost för varje levande lamm, med tackan satt som mor och — om en betäckning finns registrerad för samma tacka — baggen satt som far. Det sparar den manuella dubbelregistreringen av att först notera lamningen och sedan lägga in varje lamm för hand.
 

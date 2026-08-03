@@ -1,6 +1,7 @@
 import Dexie, { type Table } from 'dexie'
 import type {
   Animal,
+  AnimalMovement,
   AnimalPhoto,
   AppSetting,
   BodyCondition,
@@ -45,6 +46,7 @@ export class StalljournalDB extends Dexie {
   traits!: Table<Trait, string>
   trait_records!: Table<TraitRecord, string>
   documents!: Table<Document, string>
+  animal_movements!: Table<AnimalMovement, string>
 
   constructor() {
     super('stalljournal')
@@ -78,6 +80,10 @@ export class StalljournalDB extends Dexie {
     // v4: dokument (PDF/Excel) — foderanalys, träckprov, ansökningar m.m.
     this.version(4).stores({
       documents: 'id, animal_id, group_id, category, date, updated_at',
+    })
+    // v5: förflyttningar till/från anläggningen (smittspårning, se docs/domanoversikt.md §3).
+    this.version(5).stores({
+      animal_movements: 'id, animal_id, direction, date, updated_at',
     })
   }
 }

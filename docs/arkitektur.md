@@ -11,6 +11,8 @@
 
 **Revision 5 (2026-08-01):** Avelsegenskaperna (`trait`, `trait_record`, fas 6b) hade samma lucka som foton — lokala Dexie-tabeller utan motsvarande PocketBase-collection, och saknades i synkmotorns `TABLES`-lista. Åtgärdat på samma sätt som övriga JSON-tabeller (ingen binärdata inblandad här, så de följer det generiska push/pull-flödet direkt). Efter detta har all data i modellen utom `app_setting` (avsiktligt lokal enhetskonfiguration) en motsvarighet på servern och synkas.
 
+**Revision 6 (2026-08-03):** Ny tabell `animal_movement` (fas 6d) — förflyttningar av enskilda djur till/från anläggningen (annan besättning, slakteri eller transportör), med motpartens SE-nummer/registreringsnummer. Tillkom efter att appägaren efterfrågade en avstämning mot EU:s djurhälsolag (AHL) och Jordbruksverkets föreskrifter för stalljournaler: djurantal, födslar och dödsfall täcktes redan av datamodellen, men förflyttningar till/från anläggningen saknade en strukturerad plats att registreras på — `group_move` täcker bara flytt mellan egna platser, och `Animal.exit_reason` är fritext utan fält för motpartens SE-nummer. Fristående journalrad per djur (som `treatment`/`weighing`), ingen automatik mot `Animal.status`/`entry_date`/`exit_date`.
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -83,6 +85,10 @@ group_membership(id, animal_id→animal, group_id→herd_group,
                  added_on, removed_on)      -- ersätter Aktiv-flaggan med datumintervall
 group_move(id, group_id→herd_group, place_id→place,
            moved_on, ended_on, end_reason, note)
+animal_movement(id, animal_id→animal, direction, date, counterparty_type,
+           counterparty_name, counterparty_se_number, note)
+           -- till/från anläggningen (annan besättning/slakteri/transportör),
+           -- till skillnad från group_move som bara flyttar internt
 
 treatment(id, animal_id→animal, date, drug, dose, route, treated_by,
           diagnosis, veterinarian, withdrawal_days, note, photo_path)
@@ -145,7 +151,7 @@ Bottennav (5 flikar):
 
 1. **Djur** — sökbar lista (filter: aktiva/alla), detaljvy med flikar: översikt/härstamning, viktkurva (diagram), behandlingar + karensstatus, lamningar, hull, slakt.
 2. **Grupper** — grupper med aktuellt antal och plats; gruppdetalj med medlemmar, flytta-knapp, gruppbehandling, foder.
-3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, foder.
+3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, foder, extern flytt (till/från anläggningen).
 4. **Platser** — lista + kartvy (Leaflet/OSM) med grupper på plats, betesdagar.
 5. **Mer** — slakt & avräkning, slakterier, årsrapport, synkronisering.
 

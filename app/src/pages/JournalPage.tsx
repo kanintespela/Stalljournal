@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
+import { MOVEMENT_DIRECTION_LABELS } from '../db/types'
 
 interface Event {
   date: string
@@ -11,7 +12,7 @@ interface Event {
 
 export default function JournalPage() {
   const events = useLiveQuery(async () => {
-    const [weighings, treatments, moves, lambings, matings, conditions, samples, feedings] = await Promise.all([
+    const [weighings, treatments, moves, lambings, matings, conditions, samples, feedings, movements] = await Promise.all([
       db.weighings.filter((r) => r.deleted_at === null).toArray(),
       db.treatments.filter((r) => r.deleted_at === null).toArray(),
       db.group_moves.filter((r) => r.deleted_at === null).toArray(),
@@ -20,6 +21,7 @@ export default function JournalPage() {
       db.body_conditions.filter((r) => r.deleted_at === null).toArray(),
       db.parasite_samples.filter((r) => r.deleted_at === null).toArray(),
       db.feedings.filter((r) => r.deleted_at === null).toArray(),
+      db.animal_movements.filter((r) => r.deleted_at === null).toArray(),
     ])
     const animalIds = new Set([
       ...weighings.map((w) => w.animal_id),
@@ -28,6 +30,7 @@ export default function JournalPage() {
       ...matings.flatMap((m) => [m.ewe_id, m.ram_id]),
       ...conditions.map((c) => c.animal_id),
       ...samples.map((s) => s.animal_id).filter((x): x is string => Boolean(x)),
+      ...movements.map((m) => m.animal_id),
     ])
     const animals = new Map(
       (await db.animals.bulkGet([...animalIds])).filter(Boolean).map((a) => [a!.id, a!]),
@@ -93,6 +96,12 @@ export default function JournalPage() {
         text: `${groups.get(f.group_id)?.name ?? '?'}: ${f.feed_type}${f.amount ? ` (${f.amount})` : ''}`,
         link: `/grupper/${f.group_id}`,
       })),
+      ...movements.map((m) => ({
+        date: m.date,
+        category: 'Extern flytt',
+        text: `${tag(m.animal_id)}: ${MOVEMENT_DIRECTION_LABELS[m.direction]} — ${m.counterparty_type} (${m.counterparty_se_number})`,
+        link: `/djur/${m.animal_id}`,
+      })),
     ]
     all.sort((a, b) => b.date.localeCompare(a.date))
     return all.slice(0, 20)
@@ -110,6 +119,7 @@ export default function JournalPage() {
         <Link to="/journal/hull" className="btn">Hullbedömning</Link>
         <Link to="/journal/trackprov" className="btn">Träckprov</Link>
         <Link to="/journal/foder" className="btn">Utfodring</Link>
+        <Link to="/journal/flytt" className="btn">Extern flytt</Link>
         <Link to="/grupper" className="btn">Flytta grupp</Link>
       </div>
 

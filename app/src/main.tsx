@@ -17,6 +17,7 @@ import TreatmentFormPage from './pages/TreatmentFormPage'
 import LambingFormPage from './pages/LambingFormPage'
 import MatingFormPage from './pages/MatingFormPage'
 import BodyConditionFormPage from './pages/BodyConditionFormPage'
+import AnimalMovementFormPage from './pages/AnimalMovementFormPage'
 import ParasiteSampleFormPage from './pages/ParasiteSampleFormPage'
 import FeedingFormPage from './pages/FeedingFormPage'
 import MorePage from './pages/MorePage'
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
       { path: 'journal/lamning', element: <LambingFormPage /> },
       { path: 'journal/betackning', element: <MatingFormPage /> },
       { path: 'journal/hull', element: <BodyConditionFormPage /> },
+      { path: 'journal/flytt', element: <AnimalMovementFormPage /> },
       { path: 'journal/trackprov', element: <ParasiteSampleFormPage /> },
       { path: 'journal/foder', element: <FeedingFormPage /> },
       { path: 'mer', element: <MorePage /> },
