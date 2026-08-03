@@ -254,3 +254,21 @@ export interface TraitRecord extends BaseRow {
   value: number
   note: string
 }
+
+// Dokument (PDF/Excel) — foderanalys, träckprovsanalys, ansökan m.m. Valfritt
+// kopplat till ett djur och/eller en grupp. Lagras lokalt som Blob i IndexedDB;
+// synkas inte mot servern ännu (samma begränsning som AnimalPhoto).
+export interface Document extends BaseRow {
+  category: string
+  title: string
+  date: string
+  animal_id: string | null
+  group_id: string | null
+  filename: string
+  mime_type: string
+  size: number
+  blob: Blob
+  note: string
+}
+
+export const DOCUMENT_CATEGORY_SUGGESTIONS = ['Foderanalys', 'Träckprovsanalys', 'Ansökan', 'Övrigt']

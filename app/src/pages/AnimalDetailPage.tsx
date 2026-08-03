@@ -7,6 +7,7 @@ import { groupsForAnimal } from '../logic/herd'
 import { activePregnancy } from '../logic/breeding'
 import PhotoGallery from '../components/PhotoGallery'
 import AnimalTraits from '../components/AnimalTraits'
+import DocumentList from '../components/DocumentList'
 
 const WeightChart = lazy(() => import('../components/WeightChart'))
 
@@ -133,6 +134,11 @@ export default function AnimalDetailPage() {
       </div>
 
       <PhotoGallery animalId={animal.id} />
+
+      <section className="section">
+        <h2>Dokument</h2>
+        <DocumentList animalId={animal.id} />
+      </section>
 
       <section className="section">
         <h2>Uppgifter</h2>
