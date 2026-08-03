@@ -1,4 +1,4 @@
-# Stalljournal — avelsarbete
+# Fri Stalljournal — avelsarbete
 
 ## 1. Sammanfattning
 

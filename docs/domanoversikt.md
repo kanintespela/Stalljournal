@@ -1,4 +1,4 @@
-# Stalljournal — domänöversikt
+# Fri Stalljournal — domänöversikt
 
 Det här dokumentet beskriver **vad** Stalljournal behöver hålla reda på och **varför** — verksamheten hos en fårproducent, oberoende av hur appen är byggd tekniskt. Se `arkitektur.md` för den tekniska lösningen och den exakta datamodellen.
 
@@ -71,6 +71,12 @@ Träckprov och liknande provtagningar registreras per djur eller för en hel gru
 
 ### Foder
 Utfodring registreras per grupp: fodertyp, mängd och datum.
+
+### Dokument
+Fristående handlingar — foderanalyser, träckprovsanalyser, ansökningar och
+annat formellt underlag — sparas som PDF eller Excel-fil, valfritt kopplade
+till ett djur eller en grupp. Fungerar som referensmaterial snarare än en
+journalhändelse, och listas därför inte i journalflödet.
 
 ### Slakt och avräkning
 När ett djur ska slaktas registreras en slaktpost (planerad → anmäld → slaktad) med slakteri, vikt, klassning och pris. Intäkten räknas fram automatiskt. Karensvakten hindrar att ett djur med pågående karens av misstag registreras som slaktat. När slakten är genomförd markeras djuret automatiskt som slaktat och tas ur sina aktiva grupper — ingen manuell efterstädning behövs. Slakteriernas kontaktuppgifter hålls i ett eget register.

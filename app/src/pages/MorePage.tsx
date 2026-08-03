@@ -23,6 +23,14 @@ export default function MorePage() {
           </Link>
         </li>
         <li>
+          <Link to="/mer/dokument" className="card">
+            <div className="card-main">
+              <span className="card-title">Dokument</span>
+              <span className="card-meta">Foderanalyser, träckprovsanalyser, ansökningar och andra handlingar</span>
+            </div>
+          </Link>
+        </li>
+        <li>
           <Link to="/mer/rapport" className="card">
             <div className="card-main">
               <span className="card-title">Årsrapport</span>
@@ -60,8 +68,8 @@ export default function MorePage() {
         <li>
           <Link to="/mer/import" className="card">
             <div className="card-main">
-              <span className="card-title">Importera från Excel</span>
-              <span className="card-meta">Engångsimport av en Excel-export — tas bort efter användning</span>
+              <span className="card-title card-subtitle">Importera från Excel</span>
+              <span className="card-meta">Excel-import av en tidigare export — sällan behövt efter första importen</span>
             </div>
           </Link>
         </li>

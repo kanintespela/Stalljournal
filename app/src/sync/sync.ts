@@ -237,7 +237,7 @@ export async function syncNow(): Promise<SyncResult> {
     // --- PULL ---
     try {
       const since = pullWatermarks[collection]
-      const filter = since ? `updated >= "${since}"` : ''
+      const filter = since ? client.filter('updated >= {:since}', { since }) : ''
       const records = await client.collection(collection).getFullList({ filter, sort: 'updated' })
       let maxUpdated = since ?? ''
       for (const rec of records as unknown as Record<string, unknown>[]) {
@@ -264,7 +264,7 @@ export async function syncNow(): Promise<SyncResult> {
         try {
           const existing = await client
             .collection(collection)
-            .getFirstListItem(`client_id="${row.id}"`)
+            .getFirstListItem(client.filter('client_id = {:id}', { id: row.id }))
             .catch(() => null)
           if (existing) {
             await client.collection(collection).update(existing.id, toRemote(row, spec))

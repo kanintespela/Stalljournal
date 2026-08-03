@@ -1,4 +1,4 @@
-# Stalljournal — PWA
+# Fri Stalljournal — PWA
 
 Offline-first webbapp (PWA) för fårproducenter. Se `../docs/domanoversikt.md` för vad appen gör och varför, `../docs/arkitektur.md` för den tekniska arkitekturen, och `../docs/synk.md` för att sätta upp delad data mellan flera användare.
 
@@ -28,3 +28,4 @@ npm run preview    # kör produktionsbygget lokalt
 - [x] **Fas 5b — Delad data:** synkmotor mot självhostad PocketBase (`app/src/sync/`) — push/pull med `updated_at`/`deleted_at`, last-write-wins, automatisk bakgrundssynk (appstart, var 5:e minut, vid återkommen nätanslutning) + manuell synk under Mer → Synkronisering. Serverschema i `server/pb_migrations/`, installationsguide i `docs/synk.md` (PocketBase + Tailscale).
 - [x] **Fas 6a — Foton:** djur kan få flera foton, komprimerade och lagrade lokalt (IndexedDB), galleri med lightbox i djurdetaljvyn. Synkas till servern som ett PocketBase-filfält (`animal_photos`).
 - [x] **Fas 6b — Avelsegenskaper:** egna, fritt definierade egenskaper (temperament, exteriör, ullfällning m.m.) med registrering per djur och rangordning per egenskap; tillväxtjämförelse korrigerad för kullstorlek (kontemporärgruppsjämförelse). Synkas till servern (`traits`, `trait_records`). Se `docs/avel.md`.
+- [x] **Fas 6c — Dokument:** PDF/Excel-dokument (foderanalys, träckprovsanalys, ansökningar m.m.) sparas lokalt, valfritt kopplade till ett djur eller en grupp; eget bibliotek under Mer → Dokument samt inbäddat i djurdetaljvyn. Lagras som Blob i IndexedDB, synkas inte ännu mot servern (samma begränsning som foton var innan Fas 6a synkades).

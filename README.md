@@ -1,6 +1,8 @@
-# Stalljournal
+# Fri Stalljournal
 
 En digital stalljournal för fårproducenter — ett verktyg för att hålla reda på djur, grupper, förflyttningar, behandlingar, lamningar och slakt, byggt för att fungera lika bra ute i hage och stall som hemma vid köksbordet.
+
+Projektets kodnamn/repo heter fortsatt `Stalljournal` (så att appens URL och installerade genvägar inte går sönder) — "Fri" syftar på att koden är öppen källkod under MIT-licensen, fritt att använda, ändra och sprida vidare.
 
 **Appen:** [kanintespela.github.io/Stalljournal](https://kanintespela.github.io/Stalljournal/) — öppna i Safari på iPhone och välj "Lägg till på hemskärmen" för att installera den som en vanlig app.
 
@@ -21,3 +23,7 @@ cd app
 npm install
 npm run dev
 ```
+
+## Licens
+
+MIT — se [`LICENSE`](LICENSE). Fritt att använda, ändra och sprida vidare, även kommersiellt, så länge upphovsrättstexten följer med.
