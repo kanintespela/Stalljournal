@@ -65,6 +65,22 @@ export default function AnimalDetailPage() {
     async () => (id && animal?.sex === 'tacka' ? activePregnancy(id) : undefined),
     [id, animal?.sex],
   )
+  const matings = useLiveQuery(async () => {
+    if (!id) return []
+    const [asEwe, asRam] = await Promise.all([
+      db.matings.where('ewe_id').equals(id).toArray(),
+      db.matings.where('ram_id').equals(id).toArray(),
+    ])
+    const rows = [...asEwe, ...asRam]
+      .filter((m) => m.deleted_at === null)
+      .sort((a, b) => b.start_date.localeCompare(a.start_date))
+    const partners = new Map(
+      (await db.animals.bulkGet(rows.map((m) => (m.ewe_id === id ? m.ram_id : m.ewe_id))))
+        .filter(Boolean)
+        .map((a) => [a!.id, a!]),
+    )
+    return rows.map((m) => ({ mating: m, partner: partners.get(m.ewe_id === id ? m.ram_id : m.ewe_id) }))
+  }, [id])
   const slaughters = useLiveQuery(async () => {
     if (!id) return []
     const rows = await db.slaughters.where('animal_id').equals(id).toArray()
@@ -98,7 +114,7 @@ export default function AnimalDetailPage() {
   // Ångra en felregistrerad journalrad (soft delete). Djurets status/grupper
   // återställs inte automatiskt — det sägs i bekräftelsen när det är relevant.
   async function removeRow(
-    table: 'weighings' | 'treatments' | 'body_conditions' | 'animal_movements',
+    table: 'weighings' | 'treatments' | 'body_conditions' | 'animal_movements' | 'lambings' | 'matings',
     id: string,
     label: string,
     extra = '',
@@ -262,6 +278,39 @@ export default function AnimalDetailPage() {
         )}
       </section>
 
+      {matings && matings.length > 0 && (
+        <section className="section">
+          <h2>Betäckningar ({matings.length})</h2>
+          <ul className="link-list">
+            {matings.map(({ mating, partner }) => (
+              <li key={mating.id}>
+                {mating.start_date}
+                {mating.end_date && `–${mating.end_date}`}
+                {': '}
+                {partner ? (
+                  <Link to={`/djur/${partner.id}`}>
+                    {partner.tag_number}{partner.name && ` (${partner.name})`}
+                  </Link>
+                ) : '?'}
+                <button
+                  className="link-btn"
+                  onClick={() =>
+                    removeRow(
+                      'matings',
+                      mating.id,
+                      `betäckningen ${mating.start_date}`,
+                      'Om betäckningen redan använts vid en lamning ändras inte lammens far i efterhand.',
+                    )
+                  }
+                >
+                  Ta bort
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {lambings && lambings.length > 0 && (
         <section className="section">
           <h2>Lamningar ({lambings.length})</h2>
@@ -282,6 +331,21 @@ export default function AnimalDetailPage() {
                   </>
                 )}
                 {lambing.note && <span className="muted"> — {lambing.note}</span>}
+                <button
+                  className="link-btn"
+                  onClick={() =>
+                    removeRow(
+                      'lambings',
+                      lambing.id,
+                      `lamningen ${lambing.date}`,
+                      lambs.length > 0
+                        ? 'Lammen som skapades tas inte bort automatiskt — hantera dem själv via djurkortet om det behövs.'
+                        : '',
+                    )
+                  }
+                >
+                  Ta bort
+                </button>
               </li>
             ))}
           </ul>
