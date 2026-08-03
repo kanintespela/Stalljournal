@@ -13,6 +13,8 @@
 
 **Revision 6 (2026-08-03):** Ny tabell `animal_movement` (fas 6d) — förflyttningar av enskilda djur till/från anläggningen (annan besättning, slakteri eller transportör), med motpartens SE-nummer/registreringsnummer. Tillkom efter att appägaren efterfrågade en avstämning mot EU:s djurhälsolag (AHL) och Jordbruksverkets föreskrifter för stalljournaler: djurantal, födslar och dödsfall täcktes redan av datamodellen, men förflyttningar till/från anläggningen saknade en strukturerad plats att registreras på — `group_move` täcker bara flytt mellan egna platser, och `Animal.exit_reason` är fritext utan fält för motpartens SE-nummer. Fristående journalrad per djur (som `treatment`/`weighing`), ingen automatik mot `Animal.status`/`entry_date`/`exit_date`.
 
+**Revision 7 (2026-08-03):** Extern flytt kan nu välja flera djur samtidigt (kryssrutor, som gruppbehandling), och ett nytt djur som kommer utifrån kan skapas tillsammans med sin in-förflyttning i ett steg (se `logic/movements.ts`). Dessutom kan appen fylla i Jordbruksverkets riktiga PDF-blankett för förflyttningsdokument vid en "ut"-flytt (se A12) — `animal_movement` fick två nya fält (`transporter_vehicle_reg`, `transporter_permit_number`) för det. Gårdens eget SE-nummer sparas som `app_setting` (lokalt, ej synkat — det är en per-enhet-inställning i praktiken, samma mönster som synkserverns URL).
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -47,6 +49,7 @@ Vad man ger upp jämfört med native, och varför det är acceptabelt här:
 | A9 | Språk | Svenska i UI, engelska i kod/schema | Undviker å/ä/ö-problem i kod och API. |
 | A10 | Kartor | **Leaflet + OpenStreetMap** | Gratis, ingen API-nyckel, räcker för platser/beten. |
 | A11 | Diagram | **Recharts** (viktkurvor m.m.) | Enkelt, väletablerat. |
+| A12 | Myndighetsblanketter | **pdf-lib**, fyller i den riktiga officiella PDF:en (AcroForm) i klienten | Ingen server behövs (offline-first). Jordbruksverkets "Förflyttningsdokument – får och getter" (`public/forflyttningsdokument-far-getter-jsb3.12.pdf`, SJV JSB3.12 2024-05-13) har riktiga, namngivna formulärfält — vi återskapar alltså inte layouten själva utan fyller i myndighetens egen blankett. |
 
 ## 2. Systemöversikt
 
@@ -86,9 +89,12 @@ group_membership(id, animal_id→animal, group_id→herd_group,
 group_move(id, group_id→herd_group, place_id→place,
            moved_on, ended_on, end_reason, note)
 animal_movement(id, animal_id→animal, direction, date, counterparty_type,
-           counterparty_name, counterparty_se_number, note)
+           counterparty_name, counterparty_se_number, note,
+           transporter_vehicle_reg, transporter_permit_number)
            -- till/från anläggningen (annan besättning/slakteri/transportör),
-           -- till skillnad från group_move som bara flyttar internt
+           -- till skillnad från group_move som bara flyttar internt.
+           -- transporter_* används bara för att fylla i Jordbruksverkets
+           -- förflyttningsdokument (se A12), inte i övrigt.
 
 treatment(id, animal_id→animal, date, drug, dose, route, treated_by,
           diagnosis, veterinarian, withdrawal_days, note, photo_path)

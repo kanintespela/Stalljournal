@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, todayStr } from '../db/db'
-import { MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS, MOVEMENT_DIRECTION_LABELS, type MovementDirection } from '../db/types'
-import { createAnimalMovements } from '../logic/movements'
+import { MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS, MOVEMENT_DIRECTION_LABELS, type Animal, type MovementDirection } from '../db/types'
+import { createAnimalMovements, getOwnSeNumber, setOwnSeNumber, suggestedIdentity } from '../logic/movements'
 
 export default function AnimalMovementFormPage() {
   const navigate = useNavigate()
@@ -17,8 +17,22 @@ export default function AnimalMovementFormPage() {
   const [counterpartyType, setCounterpartyType] = useState('')
   const [counterpartyName, setCounterpartyName] = useState('')
   const [counterpartySeNumber, setCounterpartySeNumber] = useState('')
+  const [vehicleReg, setVehicleReg] = useState('')
+  const [transporterPermit, setTransporterPermit] = useState('')
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
+
+  // Efter en sparad "ut"-flytt: erbjud nedladdning av Jordbruksverkets
+  // förflyttningsdokument, förifyllt utifrån det som just sparades.
+  const [documentAnimals, setDocumentAnimals] = useState<Animal[] | null>(null)
+  const [identities, setIdentities] = useState<string[]>([])
+  const [ownSeNumber, setOwnSeNumberState] = useState('')
+  const [docError, setDocError] = useState('')
+  const [generating, setGenerating] = useState(false)
+
+  useEffect(() => {
+    getOwnSeNumber().then(setOwnSeNumberState)
+  }, [])
 
   const animals = useLiveQuery(async () => {
     const rows = await db.animals.filter((a) => a.deleted_at === null).toArray()
@@ -40,6 +54,11 @@ export default function AnimalMovementFormPage() {
     })
   }
 
+  function finish() {
+    const onlyPresetAnimal = presetAnimal && selected.size === 1 && selected.has(presetAnimal)
+    navigate(onlyPresetAnimal ? `/djur/${presetAnimal}` : '/journal')
+  }
+
   async function save(e: React.FormEvent) {
     e.preventDefault()
     if (selected.size === 0) {
@@ -58,16 +77,100 @@ export default function AnimalMovementFormPage() {
       setError('Ange motpartens SE-nummer/registreringsnummer — krävs för smittspårning.')
       return
     }
-    await createAnimalMovements([...selected], {
+    const selectedIds = [...selected]
+    await createAnimalMovements(selectedIds, {
       direction,
       date,
       counterparty_type: counterpartyType.trim(),
       counterparty_name: counterpartyName.trim(),
       counterparty_se_number: counterpartySeNumber.trim(),
       note,
+      transporter_vehicle_reg: vehicleReg.trim(),
+      transporter_permit_number: transporterPermit.trim(),
     })
-    const onlyPresetAnimal = presetAnimal && selected.size === 1 && selected.has(presetAnimal)
-    navigate(onlyPresetAnimal ? `/djur/${presetAnimal}` : '/journal')
+    if (direction === 'out') {
+      const rows = (await db.animals.bulkGet(selectedIds)).filter((a): a is Animal => Boolean(a))
+      setDocumentAnimals(rows)
+      setIdentities(rows.map((a) => suggestedIdentity(a)))
+    } else {
+      finish()
+    }
+  }
+
+  async function generateDocument() {
+    setDocError('')
+    const digits = ownSeNumber.replace(/\D/g, '').slice(0, 6)
+    if (!digits) {
+      setDocError('Ange gårdens SE-nummer (siffrorna efter "SE").')
+      return
+    }
+    setGenerating(true)
+    try {
+      await setOwnSeNumber(digits)
+      const { fillMovementDocument } = await import('../logic/movementDocument')
+      const blob = await fillMovementDocument({
+        ownSeNumber: digits,
+        destinationSeNumber: counterpartySeNumber.trim(),
+        date,
+        animalIdentities: identities,
+        vehicleReg: vehicleReg.trim(),
+        transporterPermit: transporterPermit.trim(),
+      })
+      const url = URL.createObjectURL(blob)
+      window.open(url, '_blank', 'noopener')
+      setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    } catch (err) {
+      setDocError(err instanceof Error ? err.message : 'Kunde inte skapa dokumentet.')
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  if (documentAnimals) {
+    return (
+      <div className="page">
+        <header className="page-header">
+          <span className="back" />
+        </header>
+        <h1>Flytt sparad</h1>
+        <p className="muted">
+          Vill du skapa Jordbruksverkets förflyttningsdokument (blankett JSB3.12) för den här sändningen?
+          Det ska följa med djuren till mottagaren, som sparar det i sin journal — skickas inte till
+          Jordbruksverket. Kontrollera identitetskoderna innan du skriver ut, de är bara ifyllda som förslag.
+        </p>
+
+        <div className="form">
+          <label>
+            Gårdens SE-nummer (avsändare) *
+            <input
+              value={ownSeNumber}
+              onChange={(e) => setOwnSeNumberState(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="6 siffror, utan SE"
+              inputMode="numeric"
+              maxLength={6}
+            />
+          </label>
+
+          {documentAnimals.map((a, i) => (
+            <label key={a.id}>
+              {a.tag_number} — identitetskod
+              <input
+                value={identities[i] ?? ''}
+                onChange={(e) => setIdentities((ids) => ids.map((v, j) => (j === i ? e.target.value : v)))}
+              />
+            </label>
+          ))}
+
+          {docError && <p className="error">{docError}</p>}
+          <button type="button" className="btn btn-primary btn-block" onClick={generateDocument} disabled={generating}>
+            {generating ? 'Skapar dokument…' : 'Skapa och öppna förflyttningsdokument'}
+          </button>
+          <button type="button" className="btn btn-block" onClick={finish}>
+            Hoppa över / Klar
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -155,6 +258,16 @@ export default function AnimalMovementFormPage() {
             placeholder="SE-produktionsplatsnummer eller transportörens/slakteriets registreringsnummer"
           />
         </label>
+        <div className="form-row">
+          <label>
+            Transportmedlets registreringsskylt
+            <input value={vehicleReg} onChange={(e) => setVehicleReg(e.target.value)} placeholder="valfritt" />
+          </label>
+          <label>
+            Transportörens tillståndsnummer
+            <input value={transporterPermit} onChange={(e) => setTransporterPermit(e.target.value)} placeholder="valfritt" />
+          </label>
+        </div>
         <label>
           Anteckningar
           <textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />

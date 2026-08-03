@@ -293,6 +293,8 @@ export interface AnimalMovement extends BaseRow {
   counterparty_name: string
   counterparty_se_number: string
   note: string
+  transporter_vehicle_reg: string
+  transporter_permit_number: string
 }
 
 export const MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS = ['Annan besättning', 'Slakteri', 'Transportör']

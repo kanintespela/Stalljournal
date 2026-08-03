@@ -109,6 +109,8 @@ export default function AnimalFormPage() {
             counterparty_name: originName.trim(),
             counterparty_se_number: originSeNumber.trim(),
             note: '',
+            transporter_vehicle_reg: '',
+            transporter_permit_number: '',
           })
         })
       } else {
