@@ -100,7 +100,7 @@ export default function AnimalFormPage() {
         deleted_at: null,
       }
       if (fromOutside) {
-        await db.transaction('rw', db.animals, db.animal_movements, async () => {
+        await db.transaction('rw', db.animals, db.animal_movements, db.group_memberships, async () => {
           await db.animals.add(newAnimal)
           await createAnimalMovements([animalId], {
             direction: 'in',

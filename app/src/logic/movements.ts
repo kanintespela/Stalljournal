@@ -15,6 +15,11 @@ export const STATUS_AFTER_LABELS: Record<StatusAfterMovement, string> = {
  * Skapar en förflyttningsrad per djur — samma mönster som treatGroupMembers.
  * Vid en "ut"-flytt med statusAfter ≠ 'keep' uppdateras även djurens status,
  * utgångsdatum och öppna gruppmedlemskap (samma mönster som saveSlaughter).
+ *
+ * OBS: öppnar en egen transaktion över animal_movements/animals/group_memberships.
+ * Anropar du den här inifrån en egen db.transaction(...) (t.ex. AnimalFormPage vid
+ * "kommer utifrån") måste den yttre transaktionen täcka minst samma tabeller,
+ * annars kastar Dexie SubTransactionError.
  */
 export async function createAnimalMovements(
   animalIds: string[],
