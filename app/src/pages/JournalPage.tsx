@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
@@ -10,7 +11,10 @@ interface Event {
   link: string
 }
 
+const PAGE_SIZE = 20
+
 export default function JournalPage() {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const events = useLiveQuery(async () => {
     const [weighings, treatments, moves, lambings, matings, conditions, samples, feedings, movements] = await Promise.all([
       db.weighings.filter((r) => r.deleted_at === null).toArray(),
@@ -104,7 +108,7 @@ export default function JournalPage() {
       })),
     ]
     all.sort((a, b) => b.date.localeCompare(a.date))
-    return all.slice(0, 20)
+    return all
   }, [])
 
   return (
@@ -128,14 +132,21 @@ export default function JournalPage() {
         {!events || events.length === 0 ? (
           <p className="muted">Inga registreringar ännu.</p>
         ) : (
-          <ul className="link-list">
-            {events.map((e, i) => (
-              <li key={i}>
-                <span className="muted">{e.date} · {e.category}</span>{' '}
-                <Link to={e.link}>{e.text}</Link>
-              </li>
-            ))}
-          </ul>
+          <>
+            <ul className="link-list">
+              {events.slice(0, visibleCount).map((e, i) => (
+                <li key={i}>
+                  <span className="muted">{e.date} · {e.category}</span>{' '}
+                  <Link to={e.link}>{e.text}</Link>
+                </li>
+              ))}
+            </ul>
+            {events.length > visibleCount && (
+              <button type="button" className="btn" onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}>
+                Visa fler ({events.length - visibleCount} till)
+              </button>
+            )}
+          </>
         )}
       </section>
     </div>
