@@ -141,6 +141,8 @@ Körs som lokala transaktioner — fungerar offline, synkas som vanliga radändr
 | **Flytta grupp** ✅ | Flyttformulär sparas | Skapar ny `group_move` och sätter `ended_on` på gruppens föregående öppna flytt. Aktuell plats = platsen i gruppens öppna flytt. |
 | **Registrera slakt** ✅ | Slaktstatus sätts till *Slaktad* | Sätter djurets status till `slaughtered` + `exit_date`, avslutar djurets öppna gruppmedlemskap (`removed_on` = slaktdatum). |
 | **Gruppbehandling** ✅ | "Behandla grupp"-formulär | Skapar en `treatment`-rad per aktivt djur i gruppen. |
+| **Nytt djur utifrån** ✅ | "Djuret kommer utifrån"-kryssruta i djurformuläret | Skapar `animal`-raden + en `animal_movement`-rad (riktning = in) i samma transaktion, så en inköpt/mottagen djurpost aldrig saknar sin förflyttningspost. |
+| **Extern flytt, flera djur** ✅ | "Extern flytt"-formuläret, kryssrutor | Skapar en `animal_movement`-rad per markerat djur (samma mönster som gruppbehandling). |
 | **Karensvakt** | Härledd, visas löpande | Djur med pågående karens flaggas i djurlistan och blockerar slaktregistrering med varning. |
 | **Dräktighetsprognos** | Härledd | Beräknad lamning = `mating.start_date + 147 dagar`. |
 | **Årsrapport** | Rapportknapp | Produktionsuppföljning för valt år: lamningsresultat (lamm/tacka, dödlighet), tillväxt (medeldaglig viktökning), slaktutfall (vikter, klassning, intäkt), läkemedelsanvändning, besättningsutveckling. Utskriftsvänlig → PDF via delningsmenyn. |

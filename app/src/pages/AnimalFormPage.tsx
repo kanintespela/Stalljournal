@@ -3,7 +3,8 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, newId, nowIso, todayStr } from '../db/db'
 import type { Animal, AnimalStatus, Sex } from '../db/types'
-import { ANIMAL_STATUS_LABELS } from '../db/types'
+import { ANIMAL_STATUS_LABELS, MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS } from '../db/types'
+import { createAnimalMovements } from '../logic/movements'
 
 const EMPTY: Omit<Animal, 'id' | 'updated_at' | 'deleted_at'> = {
   tag_number: '',
@@ -32,6 +33,10 @@ export default function AnimalFormPage() {
   const [form, setForm] = useState({ ...EMPTY })
   const [loaded, setLoaded] = useState(!isEdit)
   const [error, setError] = useState('')
+  const [fromOutside, setFromOutside] = useState(false)
+  const [originType, setOriginType] = useState('')
+  const [originName, setOriginName] = useState('')
+  const [originSeNumber, setOriginSeNumber] = useState('')
 
   useEffect(() => {
     if (!id) return
@@ -71,19 +76,44 @@ export default function AnimalFormPage() {
       setError(`Det finns redan ett djur med märkning ${form.tag_number.trim()}.`)
       return
     }
+    if (!isEdit && fromOutside) {
+      if (!originType.trim()) {
+        setError('Ange varifrån djuret kommer (typ).')
+        return
+      }
+      if (!originSeNumber.trim()) {
+        setError('Ange avsändarens SE-nummer/registreringsnummer — krävs för smittspårning.')
+        return
+      }
+    }
     const now = nowIso()
     if (isEdit && id) {
       await db.animals.update(id, { ...form, tag_number: form.tag_number.trim(), updated_at: now })
       navigate(`/djur/${id}`)
     } else {
       const animalId = newId()
-      await db.animals.add({
+      const newAnimal = {
         ...form,
         tag_number: form.tag_number.trim(),
         id: animalId,
         updated_at: now,
         deleted_at: null,
-      })
+      }
+      if (fromOutside) {
+        await db.transaction('rw', db.animals, db.animal_movements, async () => {
+          await db.animals.add(newAnimal)
+          await createAnimalMovements([animalId], {
+            direction: 'in',
+            date: form.entry_date ?? todayStr(),
+            counterparty_type: originType.trim(),
+            counterparty_name: originName.trim(),
+            counterparty_se_number: originSeNumber.trim(),
+            note: '',
+          })
+        })
+      } else {
+        await db.animals.add(newAnimal)
+      }
       navigate(`/djur/${animalId}`)
     }
   }
@@ -143,6 +173,50 @@ export default function AnimalFormPage() {
             <input type="date" value={form.entry_date ?? ''} onChange={(e) => set('entry_date', e.target.value || null)} />
           </label>
         </div>
+
+        {!isEdit && (
+          <>
+            <label>
+              <input type="checkbox" checked={fromOutside} onChange={(e) => setFromOutside(e.target.checked)} />
+              {' '}Djuret kommer utifrån (köpt/mottaget från en annan anläggning)
+            </label>
+            {fromOutside && (
+              <>
+                <p className="muted">
+                  Registrerar samtidigt en extern flytt (in) för djuret — krävs för smittspårning enligt djurhälsolagen.
+                </p>
+                <div className="form-row">
+                  <label>
+                    Avsändarens typ *
+                    <input
+                      value={originType}
+                      onChange={(e) => setOriginType(e.target.value)}
+                      list="origin-types"
+                      placeholder="t.ex. Annan besättning"
+                    />
+                    <datalist id="origin-types">
+                      {MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS.map((t) => (
+                        <option key={t} value={t} />
+                      ))}
+                    </datalist>
+                  </label>
+                  <label>
+                    Avsändarens namn
+                    <input value={originName} onChange={(e) => setOriginName(e.target.value)} placeholder="t.ex. gårdens namn" />
+                  </label>
+                </div>
+                <label>
+                  Avsändarens SE-nummer/registreringsnummer *
+                  <input
+                    value={originSeNumber}
+                    onChange={(e) => setOriginSeNumber(e.target.value)}
+                    placeholder="SE-produktionsplatsnummer eller transportörens registreringsnummer"
+                  />
+                </label>
+              </>
+            )}
+          </>
+        )}
 
         <div className="form-row">
           <label>
