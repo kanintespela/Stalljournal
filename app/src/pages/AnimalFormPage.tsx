@@ -88,7 +88,8 @@ export default function AnimalFormPage() {
     }
     const now = nowIso()
     if (isEdit && id) {
-      await db.animals.update(id, { ...form, tag_number: form.tag_number.trim(), updated_at: now })
+      const exitFields = form.status === 'active' ? { exit_date: null, exit_reason: '' } : {}
+      await db.animals.update(id, { ...form, ...exitFields, tag_number: form.tag_number.trim(), updated_at: now })
       navigate(`/djur/${id}`)
     } else {
       const animalId = newId()
