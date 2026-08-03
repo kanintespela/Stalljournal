@@ -28,7 +28,17 @@ npm run build    # tsc -b && vite build — kör alltid efter ändringar i app/
 npm run lint     # oxlint
 ```
 
-Inga automatiska tester finns i repot ännu — `build` (typkontroll) och `lint` är de enda automatiska kontrollerna. Det finns ingen CI som kör på pull requests (bara en deploy-workflow som triggas av push till `main`, `.github/workflows/deploy.yml`) — vänta inte på gröna checkar på en PR, de kommer inte.
+Inga automatiska tester finns i repot ännu — `build` (typkontroll) och `lint` är de enda automatiska kontrollerna. Det finns ingen CI som kör på pull requests (bara en deploy-workflow som triggas av push till `main`, `.github/workflows/deploy.yml`).
+
+## Git-arbetsflöde
+
+Enkelt, atomärt arbetsflöde: **committa direkt till `main`**. Inga långlivade feature-branches och inga pull requests för det vanliga arbetet — det är i praktiken en ensam utvecklare/gård, och eftersom ingen CI ändå gatear PR:ar (se ovan) gav branch+PR bara ceremoni utan verklig gatekeeper-funktion.
+
+- Varje commit ska vara **atomär**: en sammanhållen, färdig, byggbar förändring — inte ett mellansteg i en pågående refaktorering.
+- Kör **alltid** `npm run build && npm run lint` lokalt innan push till `main` — det är den enda kvalitetskontroll som finns, eftersom `main` saknar PR-gate.
+- **En push till `main` är en release**, inte bara en säkerhetskopia av arbete: `.github/workflows/deploy.yml` bygger och publicerar automatiskt till GitHub Pages på varje push till `main`.
+- Commit-meddelanden: se konventionen nedan (svenska, kort, imperativ).
+- Branch + PR är fortfarande motiverat undantagsvis: stora, riskfyllda eller experimentella ändringar man vill kunna se i sin helhet innan de går live. Det är undantaget, inte regeln.
 
 ## Centrala konventioner
 
