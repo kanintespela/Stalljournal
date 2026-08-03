@@ -2,6 +2,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso, todayStr } from '../db/db'
 import { activeMembersWithAnimals, dagarText, daysBetween, endMembership, openMove } from '../logic/herd'
+import DocumentList from '../components/DocumentList'
 
 export default function GroupDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -18,6 +19,12 @@ export default function GroupDetailPage() {
     const live = moves.filter((m) => m.deleted_at === null).sort((a, b) => b.moved_on.localeCompare(a.moved_on))
     const places = await db.places.bulkGet(live.map((m) => m.place_id))
     return live.map((m, i) => ({ move: m, placeName: places[i]?.name ?? '?' }))
+  }, [id])
+
+  const feedings = useLiveQuery(async () => {
+    if (!id) return []
+    const rows = await db.feedings.where('group_id').equals(id).toArray()
+    return rows.filter((f) => f.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
 
   if (group === undefined) return null
@@ -114,6 +121,27 @@ export default function GroupDetailPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="section">
+        <h2>Foder</h2>
+        {!feedings || feedings.length === 0 ? (
+          <p className="muted">Ingen utfodring registrerad.</p>
+        ) : (
+          <ul className="link-list">
+            {feedings.map((f) => (
+              <li key={f.id}>
+                {f.date}: <strong>{f.feed_type}</strong>{f.amount && ` (${f.amount})`}
+                {f.note && <span className="muted"> — {f.note}</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="section">
+        <h2>Dokument</h2>
+        <DocumentList groupId={group.id} />
       </section>
 
       <section className="section">
