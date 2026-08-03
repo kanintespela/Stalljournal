@@ -273,3 +273,26 @@ export interface Document extends BaseRow {
 }
 
 export const DOCUMENT_CATEGORY_SUGGESTIONS = ['Foderanalys', 'Träckprovsanalys', 'Ansökan', 'Övrigt']
+
+export type MovementDirection = 'in' | 'out'
+
+export const MOVEMENT_DIRECTION_LABELS: Record<MovementDirection, string> = {
+  in: 'Till anläggningen',
+  out: 'Från anläggningen',
+}
+
+// Förflyttning till/från anläggningen (annan besättning, slakteri eller
+// transportör) — lagkrav enligt djurhälsolagen/Jordbruksverkets föreskrifter
+// för smittspårning. Skiljer sig från GroupMove, som bara flyttar en grupp
+// mellan egna platser (hagar/stall) och inte har någon motpart utanför gården.
+export interface AnimalMovement extends BaseRow {
+  animal_id: string
+  direction: MovementDirection
+  date: string
+  counterparty_type: string
+  counterparty_name: string
+  counterparty_se_number: string
+  note: string
+}
+
+export const MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS = ['Annan besättning', 'Slakteri', 'Transportör']

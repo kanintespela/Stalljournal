@@ -2,7 +2,7 @@ import { Suspense, lazy } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso } from '../db/db'
-import { ANIMAL_STATUS_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUntil } from '../db/types'
+import { ANIMAL_STATUS_LABELS, MOVEMENT_DIRECTION_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUntil } from '../db/types'
 import { groupsForAnimal } from '../logic/herd'
 import { activePregnancy } from '../logic/breeding'
 import PhotoGallery from '../components/PhotoGallery'
@@ -70,6 +70,11 @@ export default function AnimalDetailPage() {
     const rows = await db.slaughters.where('animal_id').equals(id).toArray()
     return rows.filter((s) => s.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
+  const movements = useLiveQuery(async () => {
+    if (!id) return []
+    const rows = await db.animal_movements.where('animal_id').equals(id).toArray()
+    return rows.filter((m) => m.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
+  }, [id])
 
   if (animal === undefined) return null
   if (!animal || animal.deleted_at) {
@@ -131,6 +136,7 @@ export default function AnimalDetailPage() {
           <Link to={`/journal/lamning?tacka=${animal.id}`} className="btn">Lamning</Link>
         )}
         <Link to={`/journal/hull?djur=${animal.id}`} className="btn">Hull</Link>
+        <Link to={`/journal/flytt?djur=${animal.id}`} className="btn">Extern flytt</Link>
       </div>
 
       <PhotoGallery animalId={animal.id} />
@@ -151,6 +157,23 @@ export default function AnimalDetailPage() {
           {animal.notes && (<><dt>Anteckningar</dt><dd>{animal.notes}</dd></>)}
         </dl>
       </section>
+
+      {movements && movements.length > 0 && (
+        <section className="section">
+          <h2>Förflyttningar ({movements.length})</h2>
+          <ul className="link-list">
+            {movements.map((m) => (
+              <li key={m.id}>
+                {m.date}: <strong>{MOVEMENT_DIRECTION_LABELS[m.direction]}</strong>
+                {` — ${m.counterparty_type}`}
+                {m.counterparty_name && ` ${m.counterparty_name}`}
+                {` (SE-nr ${m.counterparty_se_number})`}
+                {m.note && <span className="muted"> — {m.note}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="section">
         <h2>Härstamning</h2>
