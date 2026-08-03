@@ -19,7 +19,7 @@ export default function TraitsPage() {
     return rows.sort((a, b) => a.name.localeCompare(b.name, 'sv'))
   }, [])
 
-  function useSuggestion(s: (typeof SUGGESTED_TRAITS)[number]) {
+  function applySuggestion(s: (typeof SUGGESTED_TRAITS)[number]) {
     setName(s.name)
     setUnit(s.unit)
     setDirection(s.direction)
@@ -78,7 +78,7 @@ export default function TraitsPage() {
           <ul className="link-list">
             {SUGGESTED_TRAITS.map((s) => (
               <li key={s.name}>
-                <button className="link-btn" onClick={() => useSuggestion(s)}>{s.name}</button>
+                <button className="link-btn" onClick={() => applySuggestion(s)}>{s.name}</button>
               </li>
             ))}
           </ul>
