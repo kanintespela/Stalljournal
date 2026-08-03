@@ -13,18 +13,28 @@ export async function createAnimalMovements(
   return animalIds.length
 }
 
-// Gårdens eget SE-nummer (avsändande anläggning) — sparas lokalt (app_setting,
-// synkas inte, se CLAUDE.md) så det bara behöver anges en gång per enhet.
-const OWN_SE_NUMBER_KEY = 'own_se_number'
-
-export async function getOwnSeNumber(): Promise<string> {
-  const row = await db.app_settings.get(OWN_SE_NUMBER_KEY)
+// Gårdsuppgifter för förflyttningsdokumentet — sparas lokalt (app_setting,
+// synkas inte, se CLAUDE.md) så de bara behöver anges en gång per enhet och
+// sedan förifylls, men går alltid att justera i formuläret för en enskild flytt.
+async function getAppSetting(key: string): Promise<string> {
+  const row = await db.app_settings.get(key)
   return row?.value ?? ''
 }
-
-export async function setOwnSeNumber(value: string): Promise<void> {
-  await db.app_settings.put({ key: OWN_SE_NUMBER_KEY, value })
+async function setAppSetting(key: string, value: string): Promise<void> {
+  if (!value) return
+  await db.app_settings.put({ key, value })
 }
+
+const OWN_SE_NUMBER_KEY = 'own_se_number'
+const LAST_VEHICLE_REG_KEY = 'last_vehicle_reg'
+const LAST_TRANSPORTER_PERMIT_KEY = 'last_transporter_permit'
+
+export const getOwnSeNumber = () => getAppSetting(OWN_SE_NUMBER_KEY)
+export const setOwnSeNumber = (value: string) => setAppSetting(OWN_SE_NUMBER_KEY, value)
+export const getLastVehicleReg = () => getAppSetting(LAST_VEHICLE_REG_KEY)
+export const setLastVehicleReg = (value: string) => setAppSetting(LAST_VEHICLE_REG_KEY, value)
+export const getLastTransporterPermit = () => getAppSetting(LAST_TRANSPORTER_PERMIT_KEY)
+export const setLastTransporterPermit = (value: string) => setAppSetting(LAST_TRANSPORTER_PERMIT_KEY, value)
 
 /** Bästa gissning på djurets identitetskod utifrån lagrad data — användaren kan justera innan utskrift. */
 export function suggestedIdentity(animal: { se_number: string; tag_number: string }): string {

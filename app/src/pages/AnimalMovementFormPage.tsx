@@ -3,7 +3,16 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, todayStr } from '../db/db'
 import { MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS, MOVEMENT_DIRECTION_LABELS, type Animal, type MovementDirection } from '../db/types'
-import { createAnimalMovements, getOwnSeNumber, setOwnSeNumber, suggestedIdentity } from '../logic/movements'
+import {
+  createAnimalMovements,
+  getLastTransporterPermit,
+  getLastVehicleReg,
+  getOwnSeNumber,
+  setLastTransporterPermit,
+  setLastVehicleReg,
+  setOwnSeNumber,
+  suggestedIdentity,
+} from '../logic/movements'
 
 export default function AnimalMovementFormPage() {
   const navigate = useNavigate()
@@ -32,6 +41,8 @@ export default function AnimalMovementFormPage() {
 
   useEffect(() => {
     getOwnSeNumber().then(setOwnSeNumberState)
+    getLastVehicleReg().then(setVehicleReg)
+    getLastTransporterPermit().then(setTransporterPermit)
   }, [])
 
   const animals = useLiveQuery(async () => {
@@ -88,6 +99,8 @@ export default function AnimalMovementFormPage() {
       transporter_vehicle_reg: vehicleReg.trim(),
       transporter_permit_number: transporterPermit.trim(),
     })
+    await setLastVehicleReg(vehicleReg.trim())
+    await setLastTransporterPermit(transporterPermit.trim())
     if (direction === 'out') {
       const rows = (await db.animals.bulkGet(selectedIds)).filter((a): a is Animal => Boolean(a))
       setDocumentAnimals(rows)
