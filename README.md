@@ -14,6 +14,7 @@ Projektets kodnamn/repo heter fortsatt `Stalljournal` (så att appens URL och in
 - [`docs/avel.md`](docs/avel.md) — egna avelsegenskaper och tillväxtjämförelse
 - [`app/README.md`](app/README.md) — utveckling och byggstatus
 - [`server/README.md`](server/README.md) — synkservern
+- [`CLAUDE.md`](CLAUDE.md) — repo-orientering och arbetssätt för AI-agenter (t.ex. receptet för att lägga till en ny synkad tabell)
 
 ## Kom igång som utvecklare
 

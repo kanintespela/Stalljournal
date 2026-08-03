@@ -9,7 +9,7 @@ Med en liten besättning är osäkerheten i alla jämförelser alltid stor. Verk
 ## 2. Vad som är byggt
 
 ### Foton
-Djur kan få flera foton kopplade till sig, komprimerade och lagrade lokalt. Används för att följa exteriör och andra synliga egenskaper visuellt över tid (djurdetaljvyn).
+Djur kan få flera foton kopplade till sig, komprimerade och lagrade lokalt. Används för att följa exteriör och andra synliga egenskaper visuellt över tid (djurdetaljvyn). Fotona synkas till servern precis som övrig data (se `docs/synk.md`) så alla på gården ser samma bilder.
 
 ### Egna avelsegenskaper (Mer → Avelsegenskaper)
 Fri, användardefinierad egenskapstyp. Varje egenskap har namn, enhet, riktning (högre/lägre är bättre, eller ett målvärde), och en fritextbeskrivning för att skriva ner ett eget testprotokoll. Fyra förslag finns färdiga att fylla i och justera:
@@ -20,6 +20,8 @@ Fri, användardefinierad egenskapstyp. Varje egenskap har namn, enhet, riktning 
 - **Vuxenvikt** — med målvärde istället för "mer/mindre är bättre", eftersom varken för stora eller för små djur är önskvärt.
 
 Värden registreras per djur (från djurkortet) och varje egenskap har en egen sida med rangordning av senast registrerade värde per djur. Rangordningen visar en tydlig varning när färre än tre djur är registrerade, eftersom jämförelsen då är särskilt osäker.
+
+Både egenskaperna och de registrerade värdena synkas till servern, precis som övrig data.
 
 ### Tillväxtjämförelse, korrigerad för kullstorlek (Mer → Tillväxtjämförelse)
 Svarar på frågan "hur skapar man jämförbara tillväxtvärden?". Metoden är en **kontemporärgruppsjämförelse**, en enkel och beprövad teknik inom fårproduktion som inte kräver data från andra besättningar:
