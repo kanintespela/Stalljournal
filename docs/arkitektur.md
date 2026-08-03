@@ -149,6 +149,8 @@ Körs som lokala transaktioner — fungerar offline, synkas som vanliga radändr
 | **Gruppbehandling** ✅ | "Behandla grupp"-formulär | Skapar en `treatment`-rad per aktivt djur i gruppen. |
 | **Nytt djur utifrån** ✅ | "Djuret kommer utifrån"-kryssruta i djurformuläret | Skapar `animal`-raden + en `animal_movement`-rad (riktning = in) i samma transaktion, så en inköpt/mottagen djurpost aldrig saknar sin förflyttningspost. |
 | **Extern flytt, flera djur** ✅ | "Extern flytt"-formuläret, kryssrutor | Skapar en `animal_movement`-rad per markerat djur (samma mönster som gruppbehandling). |
+| **Utgång via extern flytt** ✅ | "Ut"-flytt med explicit statusval (såld/slaktad/utgången) | Sätter djurens status + `exit_date` + `exit_reason` och avslutar öppna gruppmedlemskap, i samma transaktion som flyttraderna — samma mönster som slakt. Valet är alltid explicit, aldrig härlett ur motpartens fritext. |
+| **Ångra journalrad** ✅ | "Ta bort" på raden i djurdetaljvyn | Soft delete (`deleted_at`) av förflyttning/vägning/hull/behandling — synkas som borttagning till andra enheter. Återställer inte sidoeffekter (t.ex. statusändring från en flytt); bekräftelsedialogen upplyser om det. |
 | **Karensvakt** | Härledd, visas löpande | Djur med pågående karens flaggas i djurlistan och blockerar slaktregistrering med varning. |
 | **Dräktighetsprognos** | Härledd | Beräknad lamning = `mating.start_date + 147 dagar`. |
 | **Årsrapport** | Rapportknapp | Produktionsuppföljning för valt år: lamningsresultat (lamm/tacka, dödlighet), tillväxt (medeldaglig viktökning), slaktutfall (vikter, klassning, intäkt), läkemedelsanvändning, besättningsutveckling. Utskriftsvänlig → PDF via delningsmenyn. |

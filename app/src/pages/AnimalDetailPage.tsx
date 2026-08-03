@@ -95,6 +95,19 @@ export default function AnimalDetailPage() {
     navigate('/')
   }
 
+  // Ångra en felregistrerad journalrad (soft delete). Djurets status/grupper
+  // återställs inte automatiskt — det sägs i bekräftelsen när det är relevant.
+  async function removeRow(
+    table: 'weighings' | 'treatments' | 'body_conditions' | 'animal_movements',
+    id: string,
+    label: string,
+    extra = '',
+  ) {
+    if (!confirm(`Ta bort ${label}?${extra ? ` ${extra}` : ''}`)) return
+    const now = nowIso()
+    await db[table].update(id, { deleted_at: now, updated_at: now })
+  }
+
   return (
     <div className="page">
       <header className="page-header">
@@ -169,6 +182,19 @@ export default function AnimalDetailPage() {
                 {m.counterparty_name && ` ${m.counterparty_name}`}
                 {` (SE-nr ${m.counterparty_se_number})`}
                 {m.note && <span className="muted"> — {m.note}</span>}
+                <button
+                  className="link-btn"
+                  onClick={() =>
+                    removeRow(
+                      'animal_movements',
+                      m.id,
+                      `flytten ${m.date}`,
+                      'Djurets status och grupper återställs inte automatiskt — ändra dem via Redigera om flytten hann markera djuret som utgånget.',
+                    )
+                  }
+                >
+                  Ta bort
+                </button>
               </li>
             ))}
           </ul>
@@ -224,7 +250,12 @@ export default function AnimalDetailPage() {
             )}
             <ul className="link-list">
               {weighings.slice(0, 5).map((w) => (
-                <li key={w.id}>{w.date}: <strong>{w.weight_kg} kg</strong>{w.type && ` (${w.type})`}</li>
+                <li key={w.id}>
+                  {w.date}: <strong>{w.weight_kg} kg</strong>{w.type && ` (${w.type})`}
+                  <button className="link-btn" onClick={() => removeRow('weighings', w.id, `vägningen ${w.date} (${w.weight_kg} kg)`)}>
+                    Ta bort
+                  </button>
+                </li>
               ))}
             </ul>
           </>
@@ -265,6 +296,9 @@ export default function AnimalDetailPage() {
               <li key={c.id}>
                 {c.date}: <strong>{c.score}</strong>
                 {c.note && <span className="muted"> — {c.note}</span>}
+                <button className="link-btn" onClick={() => removeRow('body_conditions', c.id, `hullbedömningen ${c.date}`)}>
+                  Ta bort
+                </button>
               </li>
             ))}
           </ul>
@@ -284,6 +318,19 @@ export default function AnimalDetailPage() {
                 {t.date}: <strong>{t.drug}</strong>
                 {t.withdrawal_days > 0 && ` — karens ${t.withdrawal_days} d`}
                 {isInWithdrawal(t) && ' (pågår)'}
+                <button
+                  className="link-btn"
+                  onClick={() =>
+                    removeRow(
+                      'treatments',
+                      t.id,
+                      `behandlingen ${t.date} (${t.drug})`,
+                      isInWithdrawal(t) ? 'OBS: karensvakten för den här behandlingen försvinner också.' : '',
+                    )
+                  }
+                >
+                  Ta bort
+                </button>
               </li>
             ))}
           </ul>

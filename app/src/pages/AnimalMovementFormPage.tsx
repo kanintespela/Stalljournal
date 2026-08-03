@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, todayStr } from '../db/db'
 import { MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS, MOVEMENT_DIRECTION_LABELS, type Animal, type MovementDirection } from '../db/types'
-import { createAnimalMovements, suggestedIdentity } from '../logic/movements'
+import { createAnimalMovements, STATUS_AFTER_LABELS, suggestedIdentity, type StatusAfterMovement } from '../logic/movements'
 import {
   getLastTransporterPermit,
   getLastVehicleReg,
@@ -27,6 +27,7 @@ export default function AnimalMovementFormPage() {
   const [counterpartySeNumber, setCounterpartySeNumber] = useState('')
   const [vehicleReg, setVehicleReg] = useState('')
   const [transporterPermit, setTransporterPermit] = useState('')
+  const [statusAfter, setStatusAfter] = useState<StatusAfterMovement>('keep')
   const [note, setNote] = useState('')
   const [error, setError] = useState('')
 
@@ -88,16 +89,20 @@ export default function AnimalMovementFormPage() {
       return
     }
     const selectedIds = [...selected]
-    await createAnimalMovements(selectedIds, {
-      direction,
-      date,
-      counterparty_type: counterpartyType.trim(),
-      counterparty_name: counterpartyName.trim(),
-      counterparty_se_number: counterpartySeNumber.trim(),
-      note,
-      transporter_vehicle_reg: vehicleReg.trim(),
-      transporter_permit_number: transporterPermit.trim(),
-    })
+    await createAnimalMovements(
+      selectedIds,
+      {
+        direction,
+        date,
+        counterparty_type: counterpartyType.trim(),
+        counterparty_name: counterpartyName.trim(),
+        counterparty_se_number: counterpartySeNumber.trim(),
+        note,
+        transporter_vehicle_reg: vehicleReg.trim(),
+        transporter_permit_number: transporterPermit.trim(),
+      },
+      direction === 'out' ? statusAfter : 'keep',
+    )
     await setLastVehicleReg(vehicleReg.trim())
     await setLastTransporterPermit(transporterPermit.trim())
     if (direction === 'out') {
@@ -242,6 +247,25 @@ export default function AnimalMovementFormPage() {
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
           </label>
         </div>
+        {direction === 'out' && (
+          <>
+            <label>
+              Vad händer med djuren efter flytten?
+              <select value={statusAfter} onChange={(e) => setStatusAfter(e.target.value as StatusAfterMovement)}>
+                {(Object.entries(STATUS_AFTER_LABELS) as [StatusAfterMovement, string][]).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </label>
+            {statusAfter !== 'keep' && (
+              <p className="muted">
+                Djuren markeras som {statusAfter === 'sold' ? 'sålda' : statusAfter === 'slaughtered' ? 'slaktade' : 'utgångna'} med
+                utgångsdatum {date} och tas ur sina grupper.
+                {statusAfter === 'slaughtered' && ' Vill du även registrera slaktvikt, klassning och intäkt — använd Mer → Slakt istället, det sätter statusen automatiskt.'}
+              </p>
+            )}
+          </>
+        )}
         <div className="form-row">
           <label>
             Motpartens typ *
