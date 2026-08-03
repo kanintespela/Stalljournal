@@ -45,7 +45,7 @@ export default function AnimalMovementFormPage() {
   }, [])
 
   const animals = useLiveQuery(async () => {
-    const rows = await db.animals.filter((a) => a.deleted_at === null).toArray()
+    const rows = await db.animals.filter((a) => a.deleted_at === null && a.status === 'active').toArray()
     return rows.sort((a, b) => a.tag_number.localeCompare(b.tag_number, 'sv', { numeric: true }))
   }, []) ?? []
 
