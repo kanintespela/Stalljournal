@@ -3,16 +3,15 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, todayStr } from '../db/db'
 import { MOVEMENT_COUNTERPARTY_TYPE_SUGGESTIONS, MOVEMENT_DIRECTION_LABELS, type Animal, type MovementDirection } from '../db/types'
+import { createAnimalMovements, suggestedIdentity } from '../logic/movements'
 import {
-  createAnimalMovements,
   getLastTransporterPermit,
   getLastVehicleReg,
   getOwnSeNumber,
   setLastTransporterPermit,
   setLastVehicleReg,
   setOwnSeNumber,
-  suggestedIdentity,
-} from '../logic/movements'
+} from '../logic/farmSettings'
 
 export default function AnimalMovementFormPage() {
   const navigate = useNavigate()

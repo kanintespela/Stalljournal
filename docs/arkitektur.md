@@ -13,7 +13,7 @@
 
 **Revision 6 (2026-08-03):** Ny tabell `animal_movement` (fas 6d) — förflyttningar av enskilda djur till/från anläggningen (annan besättning, slakteri eller transportör), med motpartens SE-nummer/registreringsnummer. Tillkom efter att appägaren efterfrågade en avstämning mot EU:s djurhälsolag (AHL) och Jordbruksverkets föreskrifter för stalljournaler: djurantal, födslar och dödsfall täcktes redan av datamodellen, men förflyttningar till/från anläggningen saknade en strukturerad plats att registreras på — `group_move` täcker bara flytt mellan egna platser, och `Animal.exit_reason` är fritext utan fält för motpartens SE-nummer. Fristående journalrad per djur (som `treatment`/`weighing`), ingen automatik mot `Animal.status`/`entry_date`/`exit_date`.
 
-**Revision 7 (2026-08-03):** Extern flytt kan nu välja flera djur samtidigt (kryssrutor, som gruppbehandling), och ett nytt djur som kommer utifrån kan skapas tillsammans med sin in-förflyttning i ett steg (se `logic/movements.ts`). Dessutom kan appen fylla i Jordbruksverkets riktiga PDF-blankett för förflyttningsdokument vid en "ut"-flytt (se A12) — `animal_movement` fick två nya fält (`transporter_vehicle_reg`, `transporter_permit_number`) för det. Gårdens eget SE-nummer sparas som `app_setting` (lokalt, ej synkat — det är en per-enhet-inställning i praktiken, samma mönster som synkserverns URL). Samma sak för fordonets registreringsskylt och transportörens tillståndsnummer: senast använda värdet kommer ihåg och förifylls i formuläret (uppdateras vid varje sparad flytt), så de inte behöver skrivas in på nytt varje gång samma fordon/transportör används.
+**Revision 7 (2026-08-03):** Extern flytt kan nu välja flera djur samtidigt (kryssrutor, som gruppbehandling), och ett nytt djur som kommer utifrån kan skapas tillsammans med sin in-förflyttning i ett steg (se `logic/movements.ts`). Dessutom kan appen fylla i Jordbruksverkets riktiga PDF-blankett för förflyttningsdokument vid en "ut"-flytt (se A12) — `animal_movement` fick två nya fält (`transporter_vehicle_reg`, `transporter_permit_number`) för det. Gårdsuppgifter (namn, adress, telefon, e-post, SE-nummer, transportfordon och transportörens tillståndsnummer) samlas i en egen sida under Mer → Gårdsuppgifter (`logic/farmSettings.ts`, `pages/FarmPage.tsx`), sparade som `app_setting` (lokalt, ej synkat — i praktiken en per-enhet-inställning, samma mönster som synkserverns URL). SE-nummer, fordon och tillståndsnummer återanvänds sedan för att förifylla förflyttningsdokumentet och formuläret för extern flytt.
 
 ---
 
@@ -161,7 +161,7 @@ Bottennav (5 flikar):
 2. **Grupper** — grupper med aktuellt antal och plats; gruppdetalj med medlemmar, flytta-knapp, gruppbehandling, foder.
 3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, foder, extern flytt (till/från anläggningen).
 4. **Platser** — lista + kartvy (Leaflet/OSM) med grupper på plats, betesdagar.
-5. **Mer** — slakt & avräkning, slakterier, årsrapport, synkronisering.
+5. **Mer** — gårdsuppgifter, slakt & avräkning, slakterier, årsrapport, synkronisering.
 
 Genomgående: registrering ska klaras med en hand i fält — stora tryckytor, senaste/vanligaste värden förifyllda, djurval via sök på märkning.
 

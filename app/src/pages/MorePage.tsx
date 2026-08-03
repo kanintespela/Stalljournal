@@ -7,6 +7,14 @@ export default function MorePage() {
       <h1>Mer</h1>
       <ul className="card-list">
         <li>
+          <Link to="/mer/gard" className="card">
+            <div className="card-main">
+              <span className="card-title">Gårdsuppgifter</span>
+              <span className="card-meta">Kontaktuppgifter, adress, produktionsplatsnummer, transportfordon</span>
+            </div>
+          </Link>
+        </li>
+        <li>
           <Link to="/mer/slakt" className="card">
             <div className="card-main">
               <span className="card-title">Slakt</span>

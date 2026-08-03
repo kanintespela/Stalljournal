@@ -21,6 +21,7 @@ import AnimalMovementFormPage from './pages/AnimalMovementFormPage'
 import ParasiteSampleFormPage from './pages/ParasiteSampleFormPage'
 import FeedingFormPage from './pages/FeedingFormPage'
 import MorePage from './pages/MorePage'
+import FarmPage from './pages/FarmPage'
 import TraitsPage from './pages/TraitsPage'
 import TraitDetailPage from './pages/TraitDetailPage'
 import GrowthComparisonPage from './pages/GrowthComparisonPage'
@@ -81,6 +82,7 @@ const router = createBrowserRouter([
       { path: 'journal/trackprov', element: <ParasiteSampleFormPage /> },
       { path: 'journal/foder', element: <FeedingFormPage /> },
       { path: 'mer', element: <MorePage /> },
+      { path: 'mer/gard', element: <FarmPage /> },
       { path: 'mer/slakt', element: <SlaughtersPage /> },
       { path: 'mer/slakt/ny', element: <SlaughterFormPage /> },
       { path: 'mer/slakt/:id', element: <SlaughterFormPage /> },
