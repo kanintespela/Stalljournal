@@ -295,7 +295,7 @@ export async function syncNow(): Promise<SyncResult> {
 }
 
 function errMessage(e: unknown): string {
-  if (e instanceof ClientResponseError) return e.message
+  if (e instanceof ClientResponseError) return e.isAbort ? 'Fick ingen kontakt med servern i tid (tidsgräns).' : e.message
   return e instanceof Error ? e.message : String(e)
 }
 
