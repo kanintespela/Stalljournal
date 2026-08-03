@@ -105,7 +105,16 @@ export default function AnimalTraits({ animalId }: { animalId: string }) {
                 {trait?.unit && ` ${trait.unit}`}
                 {r.note && <span className="muted"> — {r.note}</span>}
                 {' '}
-                <button className="link-btn" onClick={() => removeTraitRecord(r.id)}>Ta bort</button>
+                <button
+                  className="link-btn"
+                  onClick={() => {
+                    if (confirm(`Ta bort registreringen ${trait?.name ?? ''} ${r.value}${trait?.unit ?? ''} (${r.date})?`)) {
+                      removeTraitRecord(r.id)
+                    }
+                  }}
+                >
+                  Ta bort
+                </button>
               </li>
             )
           })}
