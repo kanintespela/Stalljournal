@@ -122,6 +122,11 @@ export default function AnimalMovementFormPage() {
       return
     }
     setGenerating(true)
+    // Öppnas synkront direkt på klicket — annars hinner webbläsarens
+    // popup-blockerare stänga av window.open() innan PDF:en är klar
+    // (den räknas då inte längre som direkt orsakad av en användarklick).
+    const tab = window.open()
+    if (tab) tab.opener = null
     try {
       await setOwnSeNumber(digits)
       const { fillMovementDocument } = await import('../logic/movementDocument')
@@ -134,9 +139,14 @@ export default function AnimalMovementFormPage() {
         transporterPermit: transporterPermit.trim(),
       })
       const url = URL.createObjectURL(blob)
-      window.open(url, '_blank', 'noopener')
+      if (tab) {
+        tab.location.href = url
+      } else {
+        setDocError('Webbläsaren blockerade det nya fönstret. Tillåt popup-fönster för den här sidan och försök igen.')
+      }
       setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } catch (err) {
+      tab?.close()
       setDocError(err instanceof Error ? err.message : 'Kunde inte skapa dokumentet.')
     } finally {
       setGenerating(false)
