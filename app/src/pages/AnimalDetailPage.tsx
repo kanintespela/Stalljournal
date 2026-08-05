@@ -5,6 +5,7 @@ import { db, nowIso } from '../db/db'
 import { ANIMAL_STATUS_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUntil } from '../db/types'
 import { groupsForAnimal } from '../logic/herd'
 import { activePregnancy } from '../logic/breeding'
+import { describeKinship, kinshipCoefficient } from '../logic/pedigree'
 import PhotoGallery from '../components/PhotoGallery'
 import AnimalTraits from '../components/AnimalTraits'
 import DocumentList from '../components/DocumentList'
@@ -64,6 +65,10 @@ export default function AnimalDetailPage() {
   const pregnancy = useLiveQuery(
     async () => (id && animal?.sex === 'tacka' ? activePregnancy(id) : undefined),
     [id, animal?.sex],
+  )
+  const ownF = useLiveQuery(
+    () => (animal?.mother_id && animal?.father_id ? kinshipCoefficient(animal.mother_id, animal.father_id) : null),
+    [animal?.mother_id, animal?.father_id],
   )
   const slaughters = useLiveQuery(async () => {
     if (!id) return []
@@ -153,12 +158,21 @@ export default function AnimalDetailPage() {
       </section>
 
       <section className="section">
-        <h2>Härstamning</h2>
+        <div className="section-header">
+          <h2>Härstamning</h2>
+          <Link to={`/djur/${animal.id}/slaktrad`} className="btn">Släktträd</Link>
+        </div>
         <dl className="facts">
           <dt>Mor</dt>
           <dd>{mother ? <Link to={`/djur/${mother.id}`}>{mother.tag_number}{mother.name && ` (${mother.name})`}</Link> : '—'}</dd>
           <dt>Far</dt>
           <dd>{father ? <Link to={`/djur/${father.id}`}>{father.tag_number}{father.name && ` (${father.name})`}</Link> : '—'}</dd>
+          {ownF != null && (
+            <>
+              <dt>Inavelskoefficient</dt>
+              <dd>{describeKinship(ownF).pct.toFixed(1)} %</dd>
+            </>
+          )}
         </dl>
         {offspring && offspring.length > 0 && (
           <>
