@@ -56,16 +56,21 @@ export default function PedigreeTree<T extends PedigreeNodeLike<T>>({
   return (
     <div className="pedigree-scroll">
       <svg width={svgWidth} height={svgHeight} className="pedigree-tree">
+        {/* Nycklas på position i listan, inte n.data.id: samma anfader kan förekomma
+            på flera platser i trädet vid linjeavel (pedigree-collapse), vilket med
+            en id-nyckel gav en React key-kollision. Noderna saknar egen lokal state
+            och räknas om helt från `root` varje render, så en positionell nyckel är
+            säker här. */}
         <g aria-hidden="true">
-          {links.map(({ source, target }) => (
-            <path key={target.data.id} className="pedigree-link" d={linkPath({ source, target }) ?? undefined} />
+          {links.map(({ source, target }, i) => (
+            <path key={i} className="pedigree-link" d={linkPath({ source, target }) ?? undefined} />
           ))}
         </g>
         <g>
-          {nodes.map((n) => {
+          {nodes.map((n, i) => {
             const { cx, cy } = pos(n)
             return (
-              <foreignObject key={n.data.id} x={cx - nodeWidth / 2} y={cy - nodeHeight / 2} width={nodeWidth} height={nodeHeight}>
+              <foreignObject key={i} x={cx - nodeWidth / 2} y={cy - nodeHeight / 2} width={nodeWidth} height={nodeHeight}>
                 {renderNode(n.data)}
               </foreignObject>
             )

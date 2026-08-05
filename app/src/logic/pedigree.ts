@@ -33,14 +33,29 @@ export async function kinshipCoefficient(
     result = 0.5 * (1 + f)
   } else {
     const a = await getAnimal(idX, animalCache)
-    if (!a) {
-      result = 0
-    } else {
+    if (a && (a.mother_id || a.father_id)) {
       const [k1, k2] = await Promise.all([
         kinshipCoefficient(a.mother_id, idY, animalCache, memo, depth + 1),
         kinshipCoefficient(a.father_id, idY, animalCache, memo, depth + 1),
       ])
       result = 0.5 * (k1 + k2)
+    } else {
+      // idX saknar registrerade föräldrar (stamdjur) — bryt istället ner idY:s
+      // sida. Annars missas allt släktskap där idX råkar vara en anfader till
+      // idY snarare än tvärtom (t.ex. halvsyskon som delar en stamdjursförälder,
+      // eller en tacka parad med sin egen sonson): att bara ge upp här och
+      // returnera 0 är precis buggen som gjorde att syskon/halvsyskon alltid
+      // visade 0 % inavelskoefficient.
+      const b = await getAnimal(idY, animalCache)
+      if (b && (b.mother_id || b.father_id)) {
+        const [k1, k2] = await Promise.all([
+          kinshipCoefficient(idX, b.mother_id, animalCache, memo, depth + 1),
+          kinshipCoefficient(idX, b.father_id, animalCache, memo, depth + 1),
+        ])
+        result = 0.5 * (k1 + k2)
+      } else {
+        result = 0
+      }
     }
   }
   memo.set(key, result)

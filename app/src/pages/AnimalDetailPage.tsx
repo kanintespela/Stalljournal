@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso } from '../db/db'
+import type { Animal } from '../db/types'
 import { ANIMAL_STATUS_LABELS, MOVEMENT_DIRECTION_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUntil } from '../db/types'
 import { groupsForAnimal } from '../logic/herd'
 import { activePregnancy } from '../logic/breeding'
@@ -14,6 +15,15 @@ const WeightChart = lazy(() => import('../components/WeightChart'))
 
 function fmtDate(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Mor/far hämtas utan filter på deleted_at (mjuk-raderade djur ska fortfarande
+// räknas i härstamningen), men en mjuk-raderad förälders egen sida går inte
+// att öppna — länka därför bara till den om den fortfarande finns kvar.
+function ParentLink({ animal }: { animal: Animal }) {
+  const label = `${animal.tag_number}${animal.name ? ` (${animal.name})` : ''}`
+  if (animal.deleted_at) return <span>{label} <span className="muted">(borttaget djur)</span></span>
+  return <Link to={`/djur/${animal.id}`}>{label}</Link>
 }
 
 export default function AnimalDetailPage() {
@@ -229,9 +239,9 @@ export default function AnimalDetailPage() {
         </div>
         <dl className="facts">
           <dt>Mor</dt>
-          <dd>{mother ? <Link to={`/djur/${mother.id}`}>{mother.tag_number}{mother.name && ` (${mother.name})`}</Link> : '—'}</dd>
+          <dd>{mother ? <ParentLink animal={mother} /> : '—'}</dd>
           <dt>Far</dt>
-          <dd>{father ? <Link to={`/djur/${father.id}`}>{father.tag_number}{father.name && ` (${father.name})`}</Link> : '—'}</dd>
+          <dd>{father ? <ParentLink animal={father} /> : '—'}</dd>
           {ownF != null && (
             <>
               <dt>Inavelskoefficient</dt>
@@ -353,7 +363,7 @@ export default function AnimalDetailPage() {
                       lambing.id,
                       `lamningen ${lambing.date}`,
                       lambs.length > 0
-                        ? 'Lammen som skapades tas inte bort automatiskt — hantera dem själv via djurkortet om det behövs.'
+                        ? 'Lammen som skapades tas inte bort automatiskt — hantera dem själv via djurkortet om det behövs. De försvinner dock ur tillväxtjämförelsen, eftersom den bygger på kullstorleken från just den här lamningen.'
                         : '',
                     )
                   }

@@ -19,12 +19,20 @@ function animalLabel(a: Animal): string {
 // Delat kort för både anor och avkommor. Avkommor skickar aldrig animal=null
 // (varje avkomma är ett riktigt registrerat djur) — grenen för "Okänd" är
 // bara relevant på anor-sidan, men ett kort för båda är billigare än två.
+// Anor hämtas utan filter på deleted_at (härstamningen gäller ändå), men en
+// mjuk-raderad förälders sida går inte att öppna — visa kortet olänkat istället.
 function AnimalCard({ animal }: { animal: Animal | null }) {
   if (!animal) return <div className="pedigree-card pedigree-card-unknown">Okänd</div>
-  return (
-    <Link to={`/djur/${animal.id}`} className="pedigree-card">
+  const content = (
+    <>
       <span className="pedigree-card-tag">{animal.tag_number}</span>
       {animal.name && <span className="pedigree-card-name">{animal.name}</span>}
+    </>
+  )
+  if (animal.deleted_at) return <div className="pedigree-card pedigree-card-unknown">{content}</div>
+  return (
+    <Link to={`/djur/${animal.id}`} className="pedigree-card">
+      {content}
     </Link>
   )
 }
