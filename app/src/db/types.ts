@@ -217,7 +217,8 @@ export function slaughterIncome(s: Pick<Slaughter, 'price_per_kg' | 'carcass_wei
 }
 
 // Foton kopplas till djur (flera per djur, t.ex. vid olika åldrar/exteriörbedömning).
-// Lagras lokalt som Blob i IndexedDB; synkas inte mot servern ännu (se docs/avel.md).
+// Lagras lokalt som Blob i IndexedDB och synkas till PocketBase-collectionen
+// "animal_photos" (fält "photo") via sync/sync.ts, precis som övriga tabeller.
 export interface AnimalPhoto extends BaseRow {
   animal_id: string
   taken_on: string
@@ -257,7 +258,7 @@ export interface TraitRecord extends BaseRow {
 
 // Dokument (PDF/Excel) — foderanalys, träckprovsanalys, ansökan m.m. Valfritt
 // kopplat till ett djur och/eller en grupp. Lagras lokalt som Blob i IndexedDB;
-// synkas inte mot servern ännu (samma begränsning som AnimalPhoto).
+// synkas inte mot servern ännu.
 export interface Document extends BaseRow {
   category: string
   title: string

@@ -1,6 +1,7 @@
 import type { Table } from 'dexie'
-import { ClientResponseError } from 'pocketbase'
+import PocketBase, { ClientResponseError } from 'pocketbase'
 import { db, nowIso } from '../db/db'
+import type { AnimalPhoto } from '../db/types'
 import { isLoggedIn, pb } from './client'
 
 // Synkmotor: push/pull med updated_at + soft delete, last-write-wins per rad
@@ -62,6 +63,8 @@ const TABLES: TableSpec[] = [
     nullableText: ['file_path'],
     nullableNumber: ['carcass_weight', 'price_per_kg', 'base_amount', 'adjustments', 'slaughter_fee', 'transport_fee', 'total', 'vat', 'net_total'],
   },
+  { local: 'traits', collection: 'traits', nullableNumber: ['target_value'] },
+  { local: 'trait_records', collection: 'trait_records' },
 ]
 
 const PULL_WATERMARK_KEY = 'stalljournal_sync_pull'
@@ -99,6 +102,112 @@ function fromRemote(record: Record<string, unknown>, spec: TableSpec): Row {
   for (const f of spec.nullableText ?? []) if (rest[f] === '') rest[f] = null
   for (const f of spec.nullableNumber ?? []) rest[f] = rest[f] === '' || rest[f] == null ? null : Number(rest[f])
   return { ...rest, id: client_id as string } as Row
+}
+
+// --- Djurfoton: eget flöde eftersom de innehåller en binär fil (PocketBase
+// "file"-fält, multipart) istället för bara JSON-fält som TABLES ovan. Bilden
+// ändras aldrig efter att den skapats (bara borttagning/soft delete), så vi
+// laddar bara upp/ner själva filen vid nyskapande — metadataändringar (t.ex.
+// borttagning) skickas som vanlig JSON utan att filen rörs. ---
+
+const PHOTOS_COLLECTION = 'animal_photos'
+
+async function pullPhotos(client: PocketBase, watermarks: Record<string, string>, result: SyncResult): Promise<Set<string>> {
+  const pulledIds = new Set<string>()
+  const table = db.animal_photos
+  const since = watermarks[PHOTOS_COLLECTION]
+  let maxUpdated = since ?? ''
+  try {
+    const filter = since ? `updated >= "${since}"` : ''
+    const records = (await client.collection(PHOTOS_COLLECTION).getFullList({ filter, sort: 'updated' })) as unknown as Record<string, unknown>[]
+    let token = ''
+    for (const rec of records) {
+      const serverUpdated = String(rec.updated ?? '')
+      try {
+        const id = String(rec.client_id)
+        const updatedAt = String(rec.updated_at ?? '')
+        const deletedAt = rec.deleted_at ? String(rec.deleted_at) : null
+        const localRow = await table.get(id)
+        if (localRow && updatedAt < localRow.updated_at) {
+          if (serverUpdated > maxUpdated) maxUpdated = serverUpdated
+          continue
+        }
+
+        // Nedladdad fil återanvänds om vi redan har den — bilden ändras aldrig
+        // efter skapande, och en borttagen bild visas aldrig så den behöver
+        // aldrig hämtas.
+        const filename = String(rec.photo ?? '')
+        let blob = localRow?.blob
+        if (filename && !deletedAt && (!blob || blob.size === 0)) {
+          if (!token) token = await client.files.getToken()
+          const res = await fetch(client.files.getURL(rec, filename, { token }))
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          blob = await res.blob()
+        }
+
+        const photo: AnimalPhoto = {
+          id,
+          animal_id: String(rec.animal_id ?? ''),
+          taken_on: String(rec.taken_on ?? ''),
+          note: String(rec.note ?? ''),
+          blob: blob ?? new Blob(),
+          width: Number(rec.width ?? 0),
+          height: Number(rec.height ?? 0),
+          updated_at: updatedAt,
+          deleted_at: deletedAt,
+        }
+        await table.put(photo)
+        pulledIds.add(id)
+        result.pulled++
+        if (serverUpdated > maxUpdated) maxUpdated = serverUpdated
+      } catch (e) {
+        result.errors.push(`${PHOTOS_COLLECTION}/${rec.client_id} (hämta): ${errMessage(e)}`)
+      }
+    }
+  } catch (e) {
+    result.errors.push(`${PHOTOS_COLLECTION} (hämta): ${errMessage(e)}`)
+  }
+  watermarks[PHOTOS_COLLECTION] = maxUpdated
+  return pulledIds
+}
+
+async function pushPhotos(client: PocketBase, watermarks: Record<string, string>, pulledIds: Set<string>, result: SyncResult): Promise<void> {
+  const table = db.animal_photos
+  try {
+    const pushSince = watermarks[PHOTOS_COLLECTION] ?? ''
+    const changed = await table.filter((r) => r.updated_at > pushSince && !pulledIds.has(r.id)).toArray()
+    for (const row of changed) {
+      try {
+        const existing = await client
+          .collection(PHOTOS_COLLECTION)
+          .getFirstListItem(`client_id="${row.id}"`)
+          .catch(() => null)
+        const body: Record<string, unknown> = {
+          client_id: row.id,
+          animal_id: row.animal_id,
+          taken_on: row.taken_on,
+          note: row.note,
+          width: row.width,
+          height: row.height,
+          updated_at: row.updated_at,
+          deleted_at: row.deleted_at,
+        }
+        if (existing) {
+          await client.collection(PHOTOS_COLLECTION).update(existing.id, body)
+        } else {
+          body.photo = new File([row.blob], `${row.id}.jpg`, { type: row.blob.type || 'image/jpeg' })
+          await client.collection(PHOTOS_COLLECTION).create(body)
+        }
+        result.pushed++
+      } catch (e) {
+        result.errors.push(`${PHOTOS_COLLECTION}/${row.id} (skicka): ${errMessage(e)}`)
+      }
+    }
+    const newest = await table.orderBy('updated_at').last()
+    if (newest) watermarks[PHOTOS_COLLECTION] = newest.updated_at
+  } catch (e) {
+    result.errors.push(`${PHOTOS_COLLECTION} (skicka): ${errMessage(e)}`)
+  }
 }
 
 export interface SyncResult {
@@ -175,6 +284,9 @@ export async function syncNow(): Promise<SyncResult> {
       result.errors.push(`${collection} (skicka): ${errMessage(e)}`)
     }
   }
+
+  const pulledPhotoIds = await pullPhotos(client, pullWatermarks, result)
+  await pushPhotos(client, pushWatermarks, pulledPhotoIds, result)
 
   saveWatermarks(PULL_WATERMARK_KEY, pullWatermarks)
   saveWatermarks(PUSH_WATERMARK_KEY, pushWatermarks)
