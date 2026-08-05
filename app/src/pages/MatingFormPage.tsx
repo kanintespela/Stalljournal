@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, newId, nowIso, todayStr } from '../db/db'
 import { expectedLambingDate } from '../db/types'
+import { describeKinship, kinshipCoefficient } from '../logic/pedigree'
 
 export default function MatingFormPage() {
   const navigate = useNavigate()
@@ -28,6 +29,12 @@ export default function MatingFormPage() {
   const expected = startDate
     ? expectedLambingDate({ start_date: startDate }).toISOString().slice(0, 10)
     : null
+
+  const kinshipF = useLiveQuery(
+    () => (eweId && ramId ? kinshipCoefficient(eweId, ramId) : null),
+    [eweId, ramId],
+  )
+  const kinship = kinshipF != null ? describeKinship(kinshipF) : null
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
@@ -90,6 +97,14 @@ export default function MatingFormPage() {
             <span className="badge">Beräknad lamning: {expected} (147 dagar)</span>
           </p>
         )}
+        {kinship && (
+          <p className="chips">
+            <span className={kinship.severity === 'none' ? 'badge' : 'badge badge-warn'}>
+              Väntad inavelskoefficient: {kinship.pct.toFixed(1)} %
+            </span>
+          </p>
+        )}
+        {kinship && kinship.severity === 'high' && <div className="alert">{kinship.label}.</div>}
         {error && <p className="error">{error}</p>}
         <button type="submit" className="btn btn-primary btn-block">Spara betäckning</button>
       </form>

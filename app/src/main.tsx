@@ -5,6 +5,7 @@ import App from './App'
 import AnimalsPage from './pages/AnimalsPage'
 import AnimalDetailPage from './pages/AnimalDetailPage'
 import AnimalFormPage from './pages/AnimalFormPage'
+import PedigreePage from './pages/PedigreePage'
 import GroupsPage from './pages/GroupsPage'
 import GroupDetailPage from './pages/GroupDetailPage'
 import GroupFormPage from './pages/GroupFormPage'
@@ -76,6 +77,7 @@ const router = createBrowserRouter([
       { path: 'djur/ny', element: <AnimalFormPage /> },
       { path: 'djur/:id', element: <KeyByParam Component={AnimalDetailPage} /> },
       { path: 'djur/:id/redigera', element: <KeyByParam Component={AnimalFormPage} /> },
+      { path: 'djur/:id/slaktrad', element: <KeyByParam Component={PedigreePage} /> },
       { path: 'grupper', element: <GroupsPage /> },
       { path: 'grupper/ny', element: <GroupFormPage /> },
       { path: 'grupper/:id', element: <KeyByParam Component={GroupDetailPage} /> },

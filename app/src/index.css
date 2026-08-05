@@ -365,6 +365,60 @@ code { background: var(--card); border: 1px solid var(--border); border-radius: 
 .lightbox-actions { display: flex; gap: 8px; }
 .lightbox-actions .btn { background: #fff; }
 
+/* Släktträd — SVG-träd (d3-hierarchy för layout, d3-shape för länklinjer),
+   kort renderas som HTML via <foreignObject> så de kan vara riktiga
+   react-router-länkar precis som tidigare. */
+.pedigree-scroll { overflow-x: auto; padding-bottom: 4px; }
+.pedigree-tree { display: block; }
+
+.pedigree-link {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+}
+
+.pedigree-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 6px;
+  text-decoration: none;
+  color: var(--text);
+  overflow: hidden;
+}
+.pedigree-card:active { background: #faf8f3; }
+.pedigree-card-tag {
+  font-weight: 600;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pedigree-card-name {
+  font-size: 0.68rem;
+  line-height: 1.15;
+  color: var(--muted);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pedigree-card-unknown {
+  background: var(--bg);
+  color: var(--muted);
+  border-style: dashed;
+  font-size: 0.78rem;
+}
+
 @media print {
   .tabbar, .no-print { display: none !important; }
   .content { padding-bottom: 0; }

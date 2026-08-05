@@ -31,6 +31,16 @@ Svarar på frågan "hur skapar man jämförbara tillväxtvärden?". Metoden är 
 3. Djurets tillväxt jämförs mot medeltillväxten för andra djur i samma kullstorlekskategori och period, som en procentandel av gruppsnittet.
 4. Grupper med färre än tre djur märks tydligt som osäkra.
 
+### Släktträd och släktskapsgrad (djurkort → Släktträd)
+Varje djur har en egen släktträdssida med anor uppåt (mor, far, mor-/farföräldrar osv, så långt de finns registrerade) och avkommor nedåt i flera led, ritat som ett riktigt släktträd med kopplingslinjer mellan generationerna. Okända anor — vanligast på faderns sida vid inköpta baggar utan egen journal i appen — visas tydligt som "Okänd" istället för att gissas fram.
+
+Till trädet hör en beräknad **släktskapsgrad (inavelskoefficient)**, med Wrights vedertagna metod (kinship/tabular method) tillämpad på de anor som faktiskt finns registrerade. Den räknas ut på två ställen:
+
+- På djurkortet: djurets egen inavelskoefficient, utifrån dess två föräldrar.
+- Vid registrering av betäckning: väntad inavelskoefficient för en tänkt avkomma av den valda tackan och baggen, med varning vid nära släktskap.
+
+Samma ärlighetsprincip som resten av avelsverktygen gäller: en okänd anfader räknas som obesläktad i beräkningen. Det innebär att den verkliga släktskapsgraden kan vara högre än den visade siffran om anorna bakom en inköpt bagge i själva verket är släkt med besättningens egna djur — appen har helt enkelt ingen data om det.
+
 ## 3. Kvarstående idéer
 
 Fler egenskaper och testprotokoll kan läggas till efter hand — det är hela poängen med att egenskaperna är fritt definierade snarare än en fast lista. Inga ytterligare steg är planerade just nu; nya behov tas upp när de dyker upp.
