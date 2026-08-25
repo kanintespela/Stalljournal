@@ -257,8 +257,9 @@ export interface TraitRecord extends BaseRow {
 }
 
 // Dokument (PDF/Excel) — foderanalys, träckprovsanalys, ansökan m.m. Valfritt
-// kopplat till ett djur och/eller en grupp. Lagras lokalt som Blob i IndexedDB;
-// synkas inte mot servern ännu.
+// kopplat till ett djur och/eller en grupp. Lagras lokalt som Blob i IndexedDB.
+// Synkas till servern som ett PocketBase-filfält, se pullDocuments/pushDocuments
+// i sync.ts (samma mönster som animal_photos).
 export interface Document extends BaseRow {
   category: string
   title: string

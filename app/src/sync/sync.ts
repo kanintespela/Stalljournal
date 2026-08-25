@@ -1,7 +1,7 @@
 import type { Table } from 'dexie'
 import PocketBase, { ClientResponseError } from 'pocketbase'
 import { db, nowIso } from '../db/db'
-import type { AnimalPhoto } from '../db/types'
+import type { AnimalPhoto, Document } from '../db/types'
 import { isLoggedIn, pb } from './client'
 
 // Synkmotor: push/pull med updated_at + soft delete, last-write-wins per rad
@@ -217,6 +217,119 @@ async function pushPhotos(client: PocketBase, watermarks: Record<string, string>
   }
 }
 
+// --- Dokument: samma mönster som foton ovan (binärdata, eget flöde vid sidan
+// av TABLES) — filen laddas bara upp/ner vid nyskapande, aldrig vid redigering.
+// animal_id/group_id är här `string | null` (ett dokument kan sakna koppling
+// helt), så tomsträng från PocketBase måste läsas tillbaka som null. ---
+
+const DOCUMENTS_COLLECTION = 'documents'
+
+async function pullDocuments(client: PocketBase, watermarks: Record<string, string>, result: SyncResult): Promise<Set<string>> {
+  const pulledIds = new Set<string>()
+  const table = db.documents
+  const since = watermarks[DOCUMENTS_COLLECTION]
+  let maxUpdated = since ?? ''
+  try {
+    const filter = since ? `updated >= "${since}"` : ''
+    const records = (await client.collection(DOCUMENTS_COLLECTION).getFullList({ filter, sort: 'updated' })) as unknown as Record<string, unknown>[]
+    let token = ''
+    for (const rec of records) {
+      const serverUpdated = String(rec.updated ?? '')
+      try {
+        const id = String(rec.client_id)
+        const updatedAt = String(rec.updated_at ?? '')
+        const deletedAt = rec.deleted_at ? String(rec.deleted_at) : null
+        const localRow = await table.get(id)
+        if (localRow && updatedAt < localRow.updated_at) {
+          if (serverUpdated > maxUpdated) maxUpdated = serverUpdated
+          continue
+        }
+
+        // Filen laddas bara ner om vi inte redan har den — ett dokuments fil
+        // ändras aldrig efter skapande, och en borttagen fil visas aldrig så
+        // den behöver aldrig hämtas.
+        const filename = String(rec.file ?? '')
+        let blob = localRow?.blob
+        if (filename && !deletedAt && (!blob || blob.size === 0)) {
+          if (!token) token = await client.files.getToken()
+          const res = await fetch(client.files.getURL(rec, filename, { token }))
+          if (!res.ok) throw new Error(`HTTP ${res.status}`)
+          blob = await res.blob()
+        }
+
+        const doc: Document = {
+          id,
+          category: String(rec.category ?? ''),
+          title: String(rec.title ?? ''),
+          date: String(rec.date ?? ''),
+          animal_id: rec.animal_id ? String(rec.animal_id) : null,
+          group_id: rec.group_id ? String(rec.group_id) : null,
+          filename: String(rec.filename ?? ''),
+          mime_type: String(rec.mime_type ?? ''),
+          size: Number(rec.size ?? 0),
+          blob: blob ?? new Blob(),
+          note: String(rec.note ?? ''),
+          updated_at: updatedAt,
+          deleted_at: deletedAt,
+        }
+        await table.put(doc)
+        pulledIds.add(id)
+        result.pulled++
+        if (serverUpdated > maxUpdated) maxUpdated = serverUpdated
+      } catch (e) {
+        result.errors.push(`${DOCUMENTS_COLLECTION}/${rec.client_id} (hämta): ${errMessage(e)}`)
+      }
+    }
+  } catch (e) {
+    result.errors.push(`${DOCUMENTS_COLLECTION} (hämta): ${errMessage(e)}`)
+  }
+  watermarks[DOCUMENTS_COLLECTION] = maxUpdated
+  return pulledIds
+}
+
+async function pushDocuments(client: PocketBase, watermarks: Record<string, string>, pulledIds: Set<string>, result: SyncResult): Promise<void> {
+  const table = db.documents
+  try {
+    const pushSince = watermarks[DOCUMENTS_COLLECTION] ?? ''
+    const changed = await table.filter((r) => r.updated_at > pushSince && !pulledIds.has(r.id)).toArray()
+    for (const row of changed) {
+      try {
+        const existing = await client
+          .collection(DOCUMENTS_COLLECTION)
+          .getFirstListItem(`client_id="${row.id}"`)
+          .catch(() => null)
+        const body: Record<string, unknown> = {
+          client_id: row.id,
+          category: row.category,
+          title: row.title,
+          date: row.date,
+          animal_id: row.animal_id ?? '',
+          group_id: row.group_id ?? '',
+          filename: row.filename,
+          mime_type: row.mime_type,
+          size: row.size,
+          note: row.note,
+          updated_at: row.updated_at,
+          deleted_at: row.deleted_at,
+        }
+        if (existing) {
+          await client.collection(DOCUMENTS_COLLECTION).update(existing.id, body)
+        } else {
+          body.file = new File([row.blob], row.filename || `${row.id}`, { type: row.blob.type || row.mime_type || 'application/octet-stream' })
+          await client.collection(DOCUMENTS_COLLECTION).create(body)
+        }
+        result.pushed++
+      } catch (e) {
+        result.errors.push(`${DOCUMENTS_COLLECTION}/${row.id} (skicka): ${errMessage(e)}`)
+      }
+    }
+    const newest = await table.orderBy('updated_at').last()
+    if (newest) watermarks[DOCUMENTS_COLLECTION] = newest.updated_at
+  } catch (e) {
+    result.errors.push(`${DOCUMENTS_COLLECTION} (skicka): ${errMessage(e)}`)
+  }
+}
+
 export interface SyncResult {
   pulled: number
   pushed: number
@@ -304,6 +417,9 @@ export async function syncNow(): Promise<SyncResult> {
 
   const pulledPhotoIds = await pullPhotos(client, pullWatermarks, result)
   await pushPhotos(client, pushWatermarks, pulledPhotoIds, result)
+
+  const pulledDocumentIds = await pullDocuments(client, pullWatermarks, result)
+  await pushDocuments(client, pushWatermarks, pulledDocumentIds, result)
 
   saveWatermarks(PULL_WATERMARK_KEY, pullWatermarks)
   saveWatermarks(PUSH_WATERMARK_KEY, pushWatermarks)

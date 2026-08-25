@@ -15,6 +15,8 @@
 
 **Revision 7 (2026-08-03):** Extern flytt kan nu välja flera djur samtidigt (kryssrutor, som gruppbehandling), och ett nytt djur som kommer utifrån kan skapas tillsammans med sin in-förflyttning i ett steg (se `logic/movements.ts`). Dessutom kan appen fylla i Jordbruksverkets riktiga PDF-blankett för förflyttningsdokument vid en "ut"-flytt (se A12) — `animal_movement` fick två nya fält (`transporter_vehicle_reg`, `transporter_permit_number`) för det. Gårdsuppgifter (namn, adress, telefon, e-post, SE-nummer, transportfordon och transportörens tillståndsnummer) samlas i en egen sida under Mer → Gårdsuppgifter (`logic/farmSettings.ts`, `pages/FarmPage.tsx`), sparade som `app_setting` (lokalt, ej synkat — i praktiken en per-enhet-inställning, samma mönster som synkserverns URL). SE-nummer, fordon och tillståndsnummer återanvänds sedan för att förifylla förflyttningsdokumentet och formuläret för extern flytt.
 
+**Revision 8 (2026-08-06):** Dokument (`document`, fas 6c) hade samma lucka som foton och avelsegenskaper hade innan revision 4/5 — tabellen saknades helt i §3 och i synken, trots att den redan var byggd och användes lokalt. Åtgärdat på samma sätt som foton (revision 4): eget pull/push-par vid sidan av `TABLES` i `sync.ts`, eftersom dokumentet innehåller en binär fil (PDF/Excel). Till skillnad från `animal_photos.photo` är filfältet här satt till `protected: true` i PocketBase-migrationen — synkkoden hämtade redan en engångstoken innan nedladdning (samma mönster som foton), så skyddet kostar inget extra och stänger en lucka som flaggades i en tidigare säkerhetsgenomgång (foton hade av misstag `protected: false`). Efter detta har all data i modellen utom `app_setting` en motsvarighet på servern och synkas.
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -123,6 +125,10 @@ slaughter_settlement(id, slaughter_id→slaughter, date, carcass_weight,
 trait(id, name, unit, direction, target_value, description, active)
           -- se docs/avel.md §2 (fritt definierade avelsegenskaper)
 trait_record(id, trait_id→trait, animal_id→animal, date, value, note)
+
+document(id, category, title, date, animal_id?→animal, group_id?→herd_group,
+         filename, mime_type, size, file [fil], note)
+          -- foderanalys, träckprovsanalys, ansökan m.m. (se domanoversikt.md)
 
 app_setting(key, value)
 ```
