@@ -177,6 +177,7 @@ async function pushPhotos(client: PocketBase, watermarks: Record<string, string>
   try {
     const pushSince = watermarks[PHOTOS_COLLECTION] ?? ''
     const changed = await table.filter((r) => r.updated_at > pushSince && !pulledIds.has(r.id)).toArray()
+    let anyFailed = false
     for (const row of changed) {
       try {
         const existing = await client
@@ -201,11 +202,16 @@ async function pushPhotos(client: PocketBase, watermarks: Record<string, string>
         }
         result.pushed++
       } catch (e) {
+        anyFailed = true
         result.errors.push(`${PHOTOS_COLLECTION}/${row.id} (skicka): ${errMessage(e)}`)
       }
     }
-    const newest = await table.orderBy('updated_at').last()
-    if (newest) watermarks[PHOTOS_COLLECTION] = newest.updated_at
+    // Se motsvarande kommentar i syncNow() ovan — vattenmärket flyttas bara
+    // fram om hela omgången lyckades, annars kan en misslyckad rad tappas.
+    if (!anyFailed) {
+      const newest = await table.orderBy('updated_at').last()
+      if (newest) watermarks[PHOTOS_COLLECTION] = newest.updated_at
+    }
   } catch (e) {
     result.errors.push(`${PHOTOS_COLLECTION} (skicka): ${errMessage(e)}`)
   }
@@ -261,6 +267,7 @@ export async function syncNow(): Promise<SyncResult> {
     try {
       const pushSince = pushWatermarks[local] ?? ''
       const changed = await table.filter((r) => r.updated_at > pushSince && !pulledIds.has(r.id)).toArray()
+      let anyFailed = false
       for (const row of changed) {
         try {
           const existing = await client
@@ -274,13 +281,22 @@ export async function syncNow(): Promise<SyncResult> {
           }
           result.pushed++
         } catch (e) {
+          anyFailed = true
           result.errors.push(`${collection}/${row.id} (skicka): ${errMessage(e)}`)
         }
       }
       // Vattenmärket flyttas fram till senaste updated_at i hela lokala tabellen
       // (inte bara det vi push:ade), så nyss hämtade rader inte skickas tillbaka i onödan.
-      const newest = await table.orderBy('updated_at').last()
-      if (newest) pushWatermarks[local] = newest.updated_at
+      // Men bara om ALLT i den här omgången faktiskt lyckades — annars skulle
+      // vattenmärket kunna hoppa förbi en rad som misslyckades (t.ex. ett
+      // tillfälligt nätverksfel) om någon annan rad i tabellen har ett nyare
+      // updated_at, och den misslyckade raden skulle då aldrig försökas igen.
+      // En redan lyckad rad som körs om är ofarlig (samma create-or-update mot
+      // client_id), så det är säkrare att göra om hela omgången än att tappa en rad.
+      if (!anyFailed) {
+        const newest = await table.orderBy('updated_at').last()
+        if (newest) pushWatermarks[local] = newest.updated_at
+      }
     } catch (e) {
       result.errors.push(`${collection} (skicka): ${errMessage(e)}`)
     }
