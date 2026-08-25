@@ -31,6 +31,16 @@ Svarar på frågan "hur skapar man jämförbara tillväxtvärden?". Metoden är 
 3. Djurets tillväxt jämförs mot medeltillväxten för andra djur i samma kullstorlekskategori och period, som en procentandel av gruppsnittet.
 4. Grupper med färre än tre djur märks tydligt som osäkra.
 
+### Viktprognos (Mer → Viktprognos, samt djurkortet)
+Svarar på frågan "vilket datum når det här djuret en målvikt (default 50 kg)?". Lammtillväxt avtar med åldern — en rak linje genom två vägningar överskattar därför hur snabbt ett äldre lamm når målvikten. Modellen är en **monomolekylär tillväxtkurva** (Brody-kurvan, ett vedertaget mått inom husdjursavel):
+
+1. Djurets egna vägningar (kräver minst två, med känt födelsedatum) beskrivs som `W(t) = A - (A - W0) * e^(-k*(t-t0))`, där `(t0, W0)` är första vägningen, `A` är vikten kurvan planar ut mot och `k` hur snabbt den gör det.
+2. Med **minst tre vägningar** skattas både `A` och `k` ur djurets egen data (minsta-kvadrat-anpassning).
+3. Med bara **två vägningar** räcker punkterna inte till att skatta `k` (underbestämt) — då används istället en **besättnings-k**, skattad från de djur som faktiskt har tre eller fler vägningar, och bara `A` anpassas till det enskilda djurets två punkter. Samma idé som en gemensam mognadstakt med individuell skalningsparameter, som används i klassisk tillväxtkurveskattning för nötkreatur/får. Sådana prognoser märks tydligt som **osäkra**.
+4. Ett djur vars skattade `A` ligger under målvikten flaggas som att det inte når målvikten vid nuvarande tillväxttakt, istället för att visa ett (felaktigt) datum.
+
+Kullstorlek (se ovan) visas som kontext på varje rad, men driver ännu inte en egen kurva per kategori — det finns för få djur med fullständig vägningshistorik i olika kullstorleksklasser för det ännu (se `docs/avel.md` §3). Besättnings-`k` räknas om automatiskt från aktuell data varje gång, så prognosen blir bättre av sig själv i takt med att fler djur vägs regelbundet över en hel säsong.
+
 ### Släktträd och släktskapsgrad (djurkort → Släktträd)
 Varje djur har en egen släktträdssida med anor uppåt (mor, far, mor-/farföräldrar osv, så långt de finns registrerade) och avkommor nedåt i flera led, ritat som ett riktigt släktträd med kopplingslinjer mellan generationerna. Okända anor — vanligast på faderns sida vid inköpta baggar utan egen journal i appen — visas tydligt som "Okänd" istället för att gissas fram.
 
@@ -43,4 +53,6 @@ Samma ärlighetsprincip som resten av avelsverktygen gäller: en okänd anfader 
 
 ## 3. Kvarstående idéer
 
-Fler egenskaper och testprotokoll kan läggas till efter hand — det är hela poängen med att egenskaperna är fritt definierade snarare än en fast lista. Inga ytterligare steg är planerade just nu; nya behov tas upp när de dyker upp.
+Fler egenskaper och testprotokoll kan läggas till efter hand — det är hela poängen med att egenskaperna är fritt definierade snarare än en fast lista.
+
+Viktprognosens besättnings-`k` (se ovan) delas idag av alla djur oavsett kullstorlek. Så fort det finns tillräckligt många djur med fullständig vägningshistorik (tre eller fler vägningar) inom respektive kullstorlekskategori går det att skatta en egen `k` per kategori istället för en gemensam, och på så vis fånga att tvillingar/trillingar planar ut tidigare än ensamfödda. Naturligt nästa steg när ett par säsongers vägningsdata har samlats in.

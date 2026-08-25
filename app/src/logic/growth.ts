@@ -39,7 +39,7 @@ function daysBetween(a: string, b: string): number {
   return Math.round((new Date(b).getTime() - new Date(a).getTime()) / 86400000)
 }
 
-async function litterSizeCategory(animal: Animal): Promise<LitterSizeCategory | null> {
+export async function litterSizeCategory(animal: Animal): Promise<LitterSizeCategory | null> {
   if (!animal.lambing_id) return null
   const lambing = await db.lambings.get(animal.lambing_id)
   if (!lambing || lambing.deleted_at) return null

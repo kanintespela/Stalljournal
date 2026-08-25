@@ -5,6 +5,7 @@ import { db, nowIso } from '../db/db'
 import type { Animal } from '../db/types'
 import { ANIMAL_STATUS_LABELS, MOVEMENT_DIRECTION_LABELS, expectedLambingDate, isInWithdrawal, withdrawalUntil } from '../db/types'
 import { groupsForAnimal } from '../logic/herd'
+import { forecastTargetWeight } from '../logic/growthForecast'
 import { activePregnancy } from '../logic/breeding'
 import { describeKinship, kinshipCoefficient } from '../logic/pedigree'
 import PhotoGallery from '../components/PhotoGallery'
@@ -56,6 +57,7 @@ export default function AnimalDetailPage() {
     return rows.filter((w) => w.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
   const groups = useLiveQuery(() => (id ? groupsForAnimal(id) : []), [id])
+  const weightForecast = useLiveQuery(() => (id ? forecastTargetWeight(id) : undefined), [id])
   const lambings = useLiveQuery(async () => {
     if (!id) return []
     const rows = await db.lambings.where('ewe_id').equals(id).toArray()
@@ -287,6 +289,19 @@ export default function AnimalDetailPage() {
               <Suspense fallback={<div className="chart" style={{ height: 200 }} />}>
                 <WeightChart weighings={weighings} />
               </Suspense>
+            )}
+            {weightForecast && !weightForecast.alreadyReached && (
+              <p className="muted">
+                {weightForecast.unreachable ? (
+                  <>Når inte {weightForecast.targetWeightKg} kg vid nuvarande tillväxttakt.</>
+                ) : (
+                  <>
+                    Beräknat datum för {weightForecast.targetWeightKg} kg: <strong>{weightForecast.predictedDate}</strong>
+                    {!weightForecast.reliable && <span className="badge badge-warn"> Osäker prognos</span>}
+                  </>
+                )}
+                {' '}<Link to="/mer/viktprognos">Se alla djur</Link>
+              </p>
             )}
             <ul className="link-list">
               {weighings.slice(0, 5).map((w) => (

@@ -63,6 +63,14 @@ export default function MorePage() {
           </Link>
         </li>
         <li>
+          <Link to="/mer/viktprognos" className="card">
+            <div className="card-main">
+              <span className="card-title">Viktprognos</span>
+              <span className="card-meta">Uppskattat datum för när djur når en målvikt</span>
+            </div>
+          </Link>
+        </li>
+        <li>
           <Link to="/mer/synk" className="card">
             <div className="card-main">
               <span className="card-title">Synkronisering</span>
