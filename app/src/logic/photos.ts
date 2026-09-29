@@ -14,9 +14,11 @@ interface Resized {
   height: number
 }
 
-async function resizeImage(file: File): Promise<Resized> {
+// Används även för fotograferade dokument (logic/documents.ts), då med högre
+// upplösning så att texten förblir läsbar.
+export async function resizeImage(file: Blob, maxDimension = MAX_DIMENSION, quality = JPEG_QUALITY): Promise<Resized> {
   const bitmap = await createImageBitmap(file)
-  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height))
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height))
   const width = Math.round(bitmap.width * scale)
   const height = Math.round(bitmap.height * scale)
 
@@ -28,7 +30,7 @@ async function resizeImage(file: File): Promise<Resized> {
   ctx.drawImage(bitmap, 0, 0, width, height)
   bitmap.close()
 
-  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', JPEG_QUALITY))
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality))
   if (!blob) throw new Error('Kunde inte komprimera bilden.')
   return { blob, width, height }
 }

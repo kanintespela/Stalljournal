@@ -90,7 +90,8 @@ Utfodring registreras per grupp: fodertyp, mängd och datum.
 ### Dokument
 Fristående handlingar — foderanalyser, träckprovsanalyser, ansökningar och
 annat formellt underlag — sparas som PDF eller Excel-fil, valfritt kopplade
-till ett djur eller en grupp. Fungerar som referensmaterial snarare än en
+till ett djur eller en grupp. Ett pappersdokument kan också fotograferas direkt
+med mobilens kamera, en eller flera sidor, och sparas då som en PDF. Fungerar som referensmaterial snarare än en
 journalhändelse, och listas därför inte i journalflödet.
 
 ### Slakt och avräkning
