@@ -6,7 +6,7 @@ Offline-first webbapp (PWA) för fårproducenter. Se `../docs/domanoversikt.md` 
 
 - **React + TypeScript + Vite** — appramverk
 - **Dexie (IndexedDB)** — lokal databas, sanningskälla offline
-- **vite-plugin-pwa** — service worker + manifest, installeras på hemskärmen från Safari
+- **vite-plugin-pwa** — service worker + manifest, installeras på hemskärmen från Safari. Ny version tar inte över automatiskt: appen letar efter uppdateringar vid start, varje timme och när den visas igen, och visar då en banner med "Uppdatera" (`components/UpdateBanner.tsx`, `registerType: 'prompt'`)
 - **PocketBase** (självhostad, se `../server/` och `../docs/synk.md`) + **Tailscale** — delad data mellan enheter/användare, ingen molnleverantör
 
 ## Utveckling
