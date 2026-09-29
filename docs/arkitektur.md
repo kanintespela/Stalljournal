@@ -128,7 +128,8 @@ trait_record(id, trait_id→trait, animal_id→animal, date, value, note)
 
 document(id, category, title, date, animal_id?→animal, group_id?→herd_group,
          filename, mime_type, size, file [fil], note)
-          -- foderanalys, träckprovsanalys, ansökan m.m. (se domanoversikt.md)
+          -- foderanalys, träckprovsanalys, ansökan m.m. (se domanoversikt.md);
+          -- fotograferade pappersdokument görs om till PDF i klienten
 
 app_setting(key, value)
 ```

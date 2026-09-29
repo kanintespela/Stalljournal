@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, todayStr } from '../db/db'
 import type { Document } from '../db/types'
 import { DOCUMENT_CATEGORY_SUGGESTIONS } from '../db/types'
-import { addDocument, removeDocument } from '../logic/documents'
+import { addDocument, compressDocumentPage, photosToPdf, removeDocument } from '../logic/documents'
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -14,6 +14,32 @@ function formatSize(bytes: number): string {
 function baseName(filename: string): string {
   const i = filename.lastIndexOf('.')
   return i > 0 ? filename.slice(0, i) : filename
+}
+
+const PHOTO_DOCUMENT_TITLE = 'Fotograferat dokument'
+
+function safeFilename(title: string): string {
+  return title.replace(/[\\/:*?"<>|]/g, '-').trim() || PHOTO_DOCUMENT_TITLE
+}
+
+function PageThumb({ page, number, onRemove }: { page: Blob; number: number; onRemove: () => void }) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    const u = URL.createObjectURL(page)
+    setUrl(u)
+    return () => URL.revokeObjectURL(u)
+  }, [page])
+  if (!url) return <div className="photo-thumb photo-thumb-empty" />
+  return (
+    <button
+      type="button"
+      className="photo-thumb"
+      onClick={() => confirm(`Ta bort sida ${number}?`) && onRemove()}
+      title={`Sida ${number} — tryck för att ta bort`}
+    >
+      <img src={url} alt={`Sida ${number}`} />
+    </button>
+  )
 }
 
 function openDocument(doc: Document) {
@@ -45,6 +71,9 @@ export default function DocumentList({ animalId, groupId }: { animalId?: string;
   }, [scoped]) ?? []
 
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  // Fotograferade sidor (komprimerade JPEG) som blir en PDF när man sparar.
+  // `null` = inte i fotoläge.
+  const [pendingPages, setPendingPages] = useState<Blob[] | null>(null)
   const [category, setCategory] = useState('')
   const [title, setTitle] = useState('')
   const [date, setDate] = useState(todayStr())
@@ -55,11 +84,11 @@ export default function DocumentList({ animalId, groupId }: { animalId?: string;
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
-  function onFile(file: File | undefined) {
-    if (!file) return
-    setPendingFile(file)
+  const pending = pendingFile !== null || pendingPages !== null
+
+  function resetForm(initialTitle: string) {
     setCategory('')
-    setTitle(baseName(file.name))
+    setTitle(initialTitle)
     setDate(todayStr())
     setNote('')
     setPickedAnimalId('')
@@ -67,26 +96,70 @@ export default function DocumentList({ animalId, groupId }: { animalId?: string;
     setError('')
   }
 
+  function onFile(file: File | undefined) {
+    if (!file) return
+    setPendingPages(null)
+    setPendingFile(file)
+    resetForm(baseName(file.name))
+  }
+
+  async function onPhoto(input: HTMLInputElement) {
+    const file = input.files?.[0]
+    // Nollställ så att nästa foto alltid ger en change-händelse.
+    input.value = ''
+    if (!file) return
+    const startingNew = pendingPages === null
+    setBusy(true)
+    setError('')
+    try {
+      const page = await compressDocumentPage(file)
+      if (startingNew) {
+        setPendingFile(null)
+        resetForm('')
+      }
+      setPendingPages((pages) => [...(pages ?? []), page])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Kunde inte läsa fotot.')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  function removePage(index: number) {
+    setPendingPages((pages) => (pages ?? []).filter((_, i) => i !== index))
+  }
+
   function cancel() {
     setPendingFile(null)
+    setPendingPages(null)
     setError('')
   }
 
   async function save() {
-    if (!pendingFile) return
+    if (!pending) return
     setBusy(true)
     setError('')
     try {
+      let file = pendingFile
+      let finalTitle = title
+      if (pendingPages !== null) {
+        if (pendingPages.length === 0) throw new Error('Fotografera minst en sida.')
+        finalTitle = title.trim() || PHOTO_DOCUMENT_TITLE
+        const pdf = await photosToPdf(pendingPages, finalTitle)
+        file = new File([pdf], `${safeFilename(finalTitle)}.pdf`, { type: 'application/pdf' })
+      }
+      if (!file) return
       await addDocument({
-        file: pendingFile,
+        file,
         category,
-        title,
+        title: finalTitle,
         date,
         note,
         animalId: animalId ?? (pickedAnimalId || null),
         groupId: groupId ?? (pickedGroupId || null),
       })
       setPendingFile(null)
+      setPendingPages(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Kunde inte spara dokumentet.')
     } finally {
@@ -106,18 +179,58 @@ export default function DocumentList({ animalId, groupId }: { animalId?: string;
 
   return (
     <div>
-      {!pendingFile ? (
-        <label className="btn btn-primary btn-block file-btn">
-          Lägg till dokument…
-          <input
-            type="file"
-            accept=".pdf,.xlsx,.xls,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            onChange={(e) => onFile(e.target.files?.[0])}
-            hidden
-          />
-        </label>
+      {!pending ? (
+        <>
+          <div className="form-row">
+            <label className="btn btn-primary btn-block file-btn">
+              Välj fil…
+              <input
+                type="file"
+                accept=".pdf,.xlsx,.xls,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                onChange={(e) => onFile(e.target.files?.[0])}
+                hidden
+              />
+            </label>
+            <label className="btn btn-primary btn-block file-btn">
+              {busy ? 'Läser foto…' : 'Fotografera…'}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => onPhoto(e.target)}
+                disabled={busy}
+                hidden
+              />
+            </label>
+          </div>
+          {error && <p className="error">{error}</p>}
+        </>
       ) : (
         <div className="form">
+          {pendingPages !== null && (
+            <div>
+              <p className="muted" style={{ margin: '0 0 6px' }}>
+                {pendingPages.length === 1 ? '1 sida' : `${pendingPages.length} sidor`} — sparas som en PDF.
+                Tryck på en sida för att ta bort den.
+              </p>
+              <div className="photo-strip">
+                {pendingPages.map((p, i) => (
+                  <PageThumb key={i} page={p} number={i + 1} onRemove={() => removePage(i)} />
+                ))}
+                <label className="photo-add" title="Fotografera en sida till">
+                  {busy ? '…' : '+'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={(e) => onPhoto(e.target)}
+                    disabled={busy}
+                    hidden
+                  />
+                </label>
+              </div>
+            </div>
+          )}
           <div className="form-row">
             <label>
               Kategori
@@ -135,7 +248,11 @@ export default function DocumentList({ animalId, groupId }: { animalId?: string;
           </div>
           <label>
             Titel
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={pendingFile.name} />
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder={pendingFile ? pendingFile.name : PHOTO_DOCUMENT_TITLE}
+            />
           </label>
           {!scoped && (
             <div className="form-row">
