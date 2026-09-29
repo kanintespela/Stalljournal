@@ -6,7 +6,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt': en ny version tar inte över förrän användaren trycker
+      // "Uppdatera" i bannern (components/UpdateBanner.tsx) — så att en
+      // uppdatering aldrig laddar om sidan mitt i ett ifyllt formulär.
+      registerType: 'prompt',
       includeAssets: ['icon.svg'],
       // start_url/scope och navigateFallback härleds från Vites "base"
       // (sätts med --base=/Stalljournal/ vid GitHub Pages-bygget)

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { AnimalIcon, GroupIcon, JournalIcon, MoreIcon, PlaceIcon } from './components/icons'
 import { backgroundSync } from './sync/sync'
+import UpdateBanner from './components/UpdateBanner'
 
 const TABS = [
   { to: '/', label: 'Djur', Icon: AnimalIcon, end: true },
@@ -29,6 +30,7 @@ export default function App() {
       <main className="content">
         <Outlet />
       </main>
+      <UpdateBanner />
       <nav className="tabbar">
         {TABS.map((t) => (
           <NavLink
