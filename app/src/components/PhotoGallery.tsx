@@ -81,11 +81,13 @@ export default function PhotoGallery({ animalId }: { animalId: string }) {
         ))}
         <label className="photo-add">
           {busy ? '…' : '+'}
+          {/* Inget capture-attribut: med det går telefonen direkt till kameran.
+              Utan det får man telefonens vanliga val (ta bild, fotobibliotek,
+              filer), så att även befintliga foton kan läggas till. */}
           <input
             ref={fileInput}
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={(e) => onFile(e.target.files?.[0])}
             disabled={busy}
             hidden
