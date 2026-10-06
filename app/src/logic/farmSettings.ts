@@ -1,16 +1,17 @@
-import { db } from '../db/db'
+import { db, nowIso } from '../db/db'
 
-// Gårdsuppgifter — sparas lokalt (app_setting, synkas inte, se CLAUDE.md).
-// I praktiken en per-enhet-inställning (samma mönster som synkserverns URL),
-// men eftersom en gård oftast delar samma fordon och SE-nummer räcker det
-// att ange en gång per enhet och sedan återanvända.
+// Gårdsuppgifter — synkas mellan enheter (farm_settings, en rad per nyckel
+// med nyckeln som id, se types.ts). Fylls i en gång och delas av hela gården.
 
 async function getSetting(key: string): Promise<string> {
-  const row = await db.app_settings.get(key)
-  return row?.value ?? ''
+  const row = await db.farm_settings.get(key)
+  return row && row.deleted_at === null ? row.value : ''
 }
 async function setSetting(key: string, value: string): Promise<void> {
-  await db.app_settings.put({ key, value })
+  // Skriv bara om värdet faktiskt ändrats — annars skulle varje "Spara" ge
+  // ett nytt updated_at och kunna vinna över en annan enhets nyare ändring.
+  if ((await getSetting(key)) === value) return
+  await db.farm_settings.put({ id: key, value, updated_at: nowIso(), deleted_at: null })
 }
 async function setSettingIfNonEmpty(key: string, value: string): Promise<void> {
   if (!value) return

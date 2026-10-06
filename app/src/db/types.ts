@@ -180,8 +180,13 @@ export interface SlaughterSettlement extends BaseRow {
   file_path: string | null
 }
 
-export interface AppSetting {
-  key: string
+/**
+ * Gårdsuppgift (namn, adress, SE-nummer, transportfordon …), en rad per
+ * nyckel. id ÄR nyckeln (t.ex. "farm_name"), inte ett slumpat uuid — så att
+ * samma uppgift ifylld på två enheter blir samma rad och last-write-wins
+ * avgör, i stället för att bli två dubbletter.
+ */
+export interface FarmSetting extends BaseRow {
   value: string
 }
 

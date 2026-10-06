@@ -3,9 +3,9 @@ import type {
   Animal,
   AnimalMovement,
   AnimalPhoto,
-  AppSetting,
   BodyCondition,
   Document,
+  FarmSetting,
   Feeding,
   GroupMembership,
   GroupMove,
@@ -41,12 +41,12 @@ export class StalljournalDB extends Dexie {
   slaughterhouses!: Table<Slaughterhouse, string>
   slaughters!: Table<Slaughter, string>
   slaughter_settlements!: Table<SlaughterSettlement, string>
-  app_settings!: Table<AppSetting, string>
   animal_photos!: Table<AnimalPhoto, string>
   traits!: Table<Trait, string>
   trait_records!: Table<TraitRecord, string>
   documents!: Table<Document, string>
   animal_movements!: Table<AnimalMovement, string>
+  farm_settings!: Table<FarmSetting, string>
 
   constructor() {
     super('stalljournal')
@@ -84,6 +84,26 @@ export class StalljournalDB extends Dexie {
     // v5: förflyttningar till/från anläggningen (smittspårning, se docs/domanoversikt.md §3).
     this.version(5).stores({
       animal_movements: 'id, animal_id, direction, date, updated_at',
+    })
+    // v6: gårdsuppgifter synkas (tidigare lokala app_settings, se arkitektur.md
+    // revision 9). Befintliga ifyllda värden flyttas över; tomma hoppas över så
+    // att en enhet som aldrig fyllt i något inte skriver över en annan enhets
+    // uppgifter vid första synken.
+    this.version(6)
+      .stores({
+        farm_settings: 'id, updated_at',
+      })
+      .upgrade(async (tx) => {
+        const now = new Date().toISOString()
+        const old = (await tx.table('app_settings').toArray()) as { key: string; value: string }[]
+        const rows = old
+          .filter((s) => s.key && s.value)
+          .map((s) => ({ id: s.key, value: s.value, updated_at: now, deleted_at: null }))
+        if (rows.length) await tx.table('farm_settings').bulkPut(rows)
+      })
+    // v7: app_settings används inte längre (allt flyttat till farm_settings i v6).
+    this.version(7).stores({
+      app_settings: null,
     })
   }
 }

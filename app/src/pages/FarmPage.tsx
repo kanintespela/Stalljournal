@@ -44,7 +44,7 @@ export default function FarmPage() {
       </header>
       <h1>Gårdsuppgifter</h1>
       <p className="muted">
-        Sparas bara lokalt på den här enheten (synkas inte mellan enheter). Används för att förifylla
+        Delas mellan gårdens enheter via synkroniseringen. Används för att förifylla
         t.ex. Jordbruksverkets förflyttningsdokument vid en extern flytt.
       </p>
 

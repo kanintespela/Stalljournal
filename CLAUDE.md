@@ -62,7 +62,7 @@ Det här mönstret upprepas varje gång en ny datatyp ska kunna delas mellan enh
 5. **Dokumentation** — tabellen in i `docs/arkitektur.md` §3 (tabellista) och en ny revisionsrad om det är en arkitekturellt relevant ändring, collection-antalet i `server/README.md`, och ev. den domänspecifika docs-filen (t.ex. `docs/avel.md`) om en sådan finns för funktionen.
 6. **Verifiera** — `cd app && npm run build && npm run lint`. Se caveaten nedan om varför migrationsfilen inte kan köras/verifieras här.
 
-Det enda avsiktliga undantaget som INTE ska synkas: `app_setting` — ren lokal enhetskonfiguration, saknar `updated_at`/`deleted_at` helt (inte bara satt till null).
+All data i Dexie-databasen synkas — det finns inget avsiktligt undantag längre (gårdsuppgifterna låg tidigare i en lokal `app_setting` och synkades inte, se revision 9 i `docs/arkitektur.md`). Ren enhetskonfiguration (synkserverns adress, inloggning, synkens vattenmärken) ligger i `localStorage`, inte i Dexie.
 
 ## Caveat: PocketBase-migrationer skrivs blint i agentmiljön
 
