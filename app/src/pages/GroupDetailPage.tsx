@@ -2,6 +2,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso, todayStr } from '../db/db'
 import { activeMembersWithAnimals, dagarText, daysBetween, endMembership, openMove } from '../logic/herd'
+import { notesForGroup } from '../logic/notes'
 import DocumentList from '../components/DocumentList'
 
 export default function GroupDetailPage() {
@@ -27,6 +28,8 @@ export default function GroupDetailPage() {
     return rows.filter((f) => f.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
 
+  const notes = useLiveQuery(() => (id ? notesForGroup(id) : []), [id])
+
   if (group === undefined) return null
   if (!group || group.deleted_at) {
     return (
@@ -40,6 +43,12 @@ export default function GroupDetailPage() {
   async function removeMember(membershipId: string, tag: string) {
     if (!confirm(`Ta ${tag} ur gruppen?`)) return
     await endMembership(membershipId, todayStr())
+  }
+
+  async function removeNote(noteId: string, label: string) {
+    if (!confirm(`Ta bort anteckningen ${label}?`)) return
+    const now = nowIso()
+    await db.journal_notes.update(noteId, { deleted_at: now, updated_at: now })
   }
 
   async function removeGroup() {
@@ -79,6 +88,7 @@ export default function GroupDetailPage() {
         <Link to={`/grupper/${group.id}/flytta`} className="btn btn-primary">Flytta grupp</Link>
         <Link to={`/grupper/${group.id}/behandla`} className="btn">Behandla grupp</Link>
         <Link to={`/grupper/${group.id}/medlemmar`} className="btn">+ Lägg till djur</Link>
+        <Link to={`/journal/anteckning?grupp=${group.id}`} className="btn">Anteckning</Link>
       </div>
 
       <section className="section">
@@ -138,6 +148,23 @@ export default function GroupDetailPage() {
           </ul>
         )}
       </section>
+
+      {notes && notes.length > 0 && (
+        <section className="section">
+          <h2>Anteckningar ({notes.length})</h2>
+          <ul className="link-list">
+            {notes.map((n) => (
+              <li key={n.id}>
+                {n.date}: <strong>{n.category}</strong> — {n.text}{' '}
+                <Link to={`/journal/anteckning/${n.id}`} className="link-btn">Ändra</Link>
+                <button className="link-btn" onClick={() => removeNote(n.id, `${n.date} (${n.category})`)}>
+                  Ta bort
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="section">
         <h2>Dokument</h2>

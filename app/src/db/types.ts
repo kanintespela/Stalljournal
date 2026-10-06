@@ -131,6 +131,19 @@ export interface ParasiteSample extends BaseRow {
   capillaria: number | null
 }
 
+/**
+ * Fri journalanteckning för ett djur eller en grupp (exakt ett av animal_id/group_id
+ * är satt) — för händelser som inte har en egen journaltyp, t.ex. blodprov för
+ * MV-programmet, veterinärbesök, klövverkning eller klippning.
+ */
+export interface JournalNote extends BaseRow {
+  date: string
+  animal_id: string | null
+  group_id: string | null
+  category: string
+  text: string
+}
+
 export interface Feeding extends BaseRow {
   group_id: string
   date: string

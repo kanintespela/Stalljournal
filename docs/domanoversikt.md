@@ -84,7 +84,12 @@ Ett djurs hull (kroppskondition) poängsätts periodvis på en skala, för att f
 ### Provtagning (parasiter m.m.)
 Träckprov och liknande provtagningar registreras per djur eller för en hel grupp, med resultat och eventuella detaljerade parasitvärden. Detta styr beslut om avmaskning och betesrotation.
 
-**Blodprov (t.ex. Maedi-Visna-programmet).** Vid anslutning till eller kontroll inom MV-programmet blodprovas hela eller delar av besättningen samma dag, och labbsvaret kommer först veckor senare — per djur. Därför registreras blodprov med massval av djur (sök, "Alla", "Visa bara tackor", eller lägg till en hel grupp), och det skapas **en provrad per djur** med resultatet "Väntar på svar". När labbet svarat läggs svaren in under Journal → Provsvar, där väntande prov visas per provomgång (samma datum och provtyp) med ett resultat per djur (Negativ/Positiv/Ej bedömbart) och en knapp för att sätta alla på en gång och sedan ändra undantagen. Så länge något prov väntar på svar visas en påminnelse i journalen, och varje djurkort listar djurets provtagningar med resultat. Själva labbsvaret/remissen kan sparas som PDF under Dokument.
+### Anteckningar
+Allt som händer i en besättning har inte ett eget formulär — blodprov för Maedi-Visna-programmet, veterinärbesök, klövverkning, klippning, en observation i hagen. För det finns en **fri journalanteckning**: datum, kategori (fritext med förslag, t.ex. Blodprov, Provsvar, Veterinärbesök) och text. En anteckning gäller antingen
+- **ett eller flera djur** — man kryssar i djuren (sök, "Alla", "Visa bara tackor", eller markera alla i en grupp) och det skapas en anteckning per djur, så att varje djurs journal blir komplett, eller
+- **en grupp** som helhet — då sparas en anteckning på gruppen, och den visas också på djurkortet för de djur som var med i gruppen det datumet (härlett ur gruppmedlemskapens datumintervall, samma princip som annan historik).
+
+Anteckningar syns i journalflödet, på djurkortet och på gruppsidan, och kan ändras eller tas bort i efterhand. Underlag som labbsvar eller remisser sparas som PDF under Dokument.
 
 ### Foder
 Utfodring registreras per grupp: fodertyp, mängd och datum.

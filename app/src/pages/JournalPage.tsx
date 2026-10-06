@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { MOVEMENT_DIRECTION_LABELS } from '../db/types'
-import { isPending } from '../logic/samples'
 
 interface Event {
   date: string
@@ -17,7 +16,7 @@ const PAGE_SIZE = 20
 export default function JournalPage() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const events = useLiveQuery(async () => {
-    const [weighings, treatments, moves, lambings, matings, conditions, samples, feedings, movements] = await Promise.all([
+    const [weighings, treatments, moves, lambings, matings, conditions, samples, feedings, movements, notes] = await Promise.all([
       db.weighings.filter((r) => r.deleted_at === null).toArray(),
       db.treatments.filter((r) => r.deleted_at === null).toArray(),
       db.group_moves.filter((r) => r.deleted_at === null).toArray(),
@@ -27,6 +26,7 @@ export default function JournalPage() {
       db.parasite_samples.filter((r) => r.deleted_at === null).toArray(),
       db.feedings.filter((r) => r.deleted_at === null).toArray(),
       db.animal_movements.filter((r) => r.deleted_at === null).toArray(),
+      db.journal_notes.filter((r) => r.deleted_at === null).toArray(),
     ])
     const animalIds = new Set([
       ...weighings.map((w) => w.animal_id),
@@ -36,6 +36,7 @@ export default function JournalPage() {
       ...conditions.map((c) => c.animal_id),
       ...samples.map((s) => s.animal_id).filter((x): x is string => Boolean(x)),
       ...movements.map((m) => m.animal_id),
+      ...notes.map((n) => n.animal_id).filter((x): x is string => Boolean(x)),
     ])
     const animals = new Map(
       (await db.animals.bulkGet([...animalIds])).filter(Boolean).map((a) => [a!.id, a!]),
@@ -44,6 +45,7 @@ export default function JournalPage() {
       ...moves.map((m) => m.group_id),
       ...feedings.map((f) => f.group_id),
       ...samples.map((s) => s.group_id).filter((x): x is string => Boolean(x)),
+      ...notes.map((n) => n.group_id).filter((x): x is string => Boolean(x)),
     ])
     const groups = new Map(
       (await db.herd_groups.bulkGet([...groupIds])).filter(Boolean).map((g) => [g!.id, g!]),
@@ -107,14 +109,16 @@ export default function JournalPage() {
         text: `${tag(m.animal_id)}: ${MOVEMENT_DIRECTION_LABELS[m.direction]} — ${m.counterparty_type} (${m.counterparty_se_number})`,
         link: `/djur/${m.animal_id}`,
       })),
+      ...notes.map((n) => ({
+        date: n.date,
+        category: n.category,
+        text: `${n.animal_id ? tag(n.animal_id) : groups.get(n.group_id!)?.name ?? '?'}: ${n.text}`,
+        link: n.animal_id ? `/djur/${n.animal_id}` : `/grupper/${n.group_id}`,
+      })),
     ]
     all.sort((a, b) => b.date.localeCompare(a.date))
     return all
   }, [])
-  const pendingSamples = useLiveQuery(
-    () => db.parasite_samples.filter((s) => s.deleted_at === null && isPending(s)).count(),
-    [],
-  ) ?? 0
 
   return (
     <div className="page">
@@ -127,18 +131,11 @@ export default function JournalPage() {
         <Link to="/journal/betackning" className="btn">Betäckning</Link>
         <Link to="/journal/hull" className="btn">Hullbedömning</Link>
         <Link to="/journal/trackprov" className="btn">Träckprov</Link>
-        <Link to="/journal/blodprov" className="btn">Blodprov</Link>
         <Link to="/journal/foder" className="btn">Utfodring</Link>
+        <Link to="/journal/anteckning" className="btn">Anteckning</Link>
         <Link to="/journal/flytt" className="btn">Extern flytt</Link>
         <Link to="/grupper" className="btn">Flytta grupp</Link>
       </div>
-
-      {pendingSamples > 0 && (
-        <div className="alert">
-          <strong>{pendingSamples}</strong> prov väntar på svar från labbet.{' '}
-          <Link to="/journal/provsvar">Lägg in provsvar</Link>
-        </div>
-      )}
 
       <section className="section">
         <h2>Senaste händelser</h2>
