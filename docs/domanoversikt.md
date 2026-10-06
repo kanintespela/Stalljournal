@@ -84,6 +84,8 @@ Ett djurs hull (kroppskondition) poängsätts periodvis på en skala, för att f
 ### Provtagning (parasiter m.m.)
 Träckprov och liknande provtagningar registreras per djur eller för en hel grupp, med resultat och eventuella detaljerade parasitvärden. Detta styr beslut om avmaskning och betesrotation.
 
+**Blodprov (t.ex. Maedi-Visna-programmet).** Vid anslutning till eller kontroll inom MV-programmet blodprovas hela eller delar av besättningen samma dag, och labbsvaret kommer först veckor senare — per djur. Därför registreras blodprov med massval av djur (sök, "Alla", "Visa bara tackor", eller lägg till en hel grupp), och det skapas **en provrad per djur** med resultatet "Väntar på svar". När labbet svarat läggs svaren in under Journal → Provsvar, där väntande prov visas per provomgång (samma datum och provtyp) med ett resultat per djur (Negativ/Positiv/Ej bedömbart) och en knapp för att sätta alla på en gång och sedan ändra undantagen. Så länge något prov väntar på svar visas en påminnelse i journalen, och varje djurkort listar djurets provtagningar med resultat. Själva labbsvaret/remissen kan sparas som PDF under Dokument.
+
 ### Foder
 Utfodring registreras per grupp: fodertyp, mängd och datum.
 

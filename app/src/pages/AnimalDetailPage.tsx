@@ -7,6 +7,7 @@ import { ANIMAL_STATUS_LABELS, MOVEMENT_DIRECTION_LABELS, expectedLambingDate, i
 import { groupsForAnimal } from '../logic/herd'
 import { forecastTargetWeight } from '../logic/growthForecast'
 import { activePregnancy } from '../logic/breeding'
+import { isPending } from '../logic/samples'
 import { describeKinship, kinshipCoefficient } from '../logic/pedigree'
 import PhotoGallery from '../components/PhotoGallery'
 import AnimalTraits from '../components/AnimalTraits'
@@ -103,6 +104,11 @@ export default function AnimalDetailPage() {
     const rows = await db.slaughters.where('animal_id').equals(id).toArray()
     return rows.filter((s) => s.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
+  const samples = useLiveQuery(async () => {
+    if (!id) return []
+    const rows = await db.parasite_samples.where('animal_id').equals(id).toArray()
+    return rows.filter((s) => s.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
+  }, [id])
   const movements = useLiveQuery(async () => {
     if (!id) return []
     const rows = await db.animal_movements.where('animal_id').equals(id).toArray()
@@ -131,7 +137,7 @@ export default function AnimalDetailPage() {
   // Ångra en felregistrerad journalrad (soft delete). Djurets status/grupper
   // återställs inte automatiskt — det sägs i bekräftelsen när det är relevant.
   async function removeRow(
-    table: 'weighings' | 'treatments' | 'body_conditions' | 'animal_movements' | 'lambings' | 'matings',
+    table: 'weighings' | 'treatments' | 'body_conditions' | 'animal_movements' | 'lambings' | 'matings' | 'parasite_samples',
     id: string,
     label: string,
     extra = '',
@@ -182,6 +188,7 @@ export default function AnimalDetailPage() {
           <Link to={`/journal/lamning?tacka=${animal.id}`} className="btn">Lamning</Link>
         )}
         <Link to={`/journal/hull?djur=${animal.id}`} className="btn">Hull</Link>
+        <Link to={`/journal/blodprov?djur=${animal.id}`} className="btn">Blodprov</Link>
         <Link to={`/journal/flytt?djur=${animal.id}`} className="btn">Extern flytt</Link>
       </div>
 
@@ -405,6 +412,25 @@ export default function AnimalDetailPage() {
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {samples && samples.length > 0 && (
+        <section className="section">
+          <h2>Provtagningar ({samples.length})</h2>
+          <ul className="link-list">
+            {samples.map((s) => (
+              <li key={s.id}>
+                {s.date}: <strong>{s.type}</strong>
+                {s.result && (isPending(s) ? <span className="muted"> — {s.result}</span> : ` — ${s.result}`)}
+                {s.note && <span className="muted"> ({s.note})</span>}
+                <button className="link-btn" onClick={() => removeRow('parasite_samples', s.id, `provtagningen ${s.date} (${s.type})`)}>
+                  Ta bort
+                </button>
+              </li>
+            ))}
+          </ul>
+          {samples.some(isPending) && <Link to="/journal/provsvar">Lägg in provsvar</Link>}
         </section>
       )}
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
 import { MOVEMENT_DIRECTION_LABELS } from '../db/types'
+import { isPending } from '../logic/samples'
 
 interface Event {
   date: string
@@ -110,6 +111,10 @@ export default function JournalPage() {
     all.sort((a, b) => b.date.localeCompare(a.date))
     return all
   }, [])
+  const pendingSamples = useLiveQuery(
+    () => db.parasite_samples.filter((s) => s.deleted_at === null && isPending(s)).count(),
+    [],
+  ) ?? 0
 
   return (
     <div className="page">
@@ -122,10 +127,18 @@ export default function JournalPage() {
         <Link to="/journal/betackning" className="btn">Betäckning</Link>
         <Link to="/journal/hull" className="btn">Hullbedömning</Link>
         <Link to="/journal/trackprov" className="btn">Träckprov</Link>
+        <Link to="/journal/blodprov" className="btn">Blodprov</Link>
         <Link to="/journal/foder" className="btn">Utfodring</Link>
         <Link to="/journal/flytt" className="btn">Extern flytt</Link>
         <Link to="/grupper" className="btn">Flytta grupp</Link>
       </div>
+
+      {pendingSamples > 0 && (
+        <div className="alert">
+          <strong>{pendingSamples}</strong> prov väntar på svar från labbet.{' '}
+          <Link to="/journal/provsvar">Lägg in provsvar</Link>
+        </div>
+      )}
 
       <section className="section">
         <h2>Senaste händelser</h2>

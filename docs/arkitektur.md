@@ -173,7 +173,7 @@ Bottennav (5 flikar):
 
 1. **Djur** — sökbar lista (filter: aktiva/alla), detaljvy med flikar: översikt/härstamning, viktkurva (diagram), behandlingar + karensstatus, lamningar, hull, slakt.
 2. **Grupper** — grupper med aktuellt antal och plats; gruppdetalj med medlemmar, flytta-knapp, gruppbehandling, foder.
-3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, foder, extern flytt (till/från anläggningen).
+3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, blodprov (massval av djur, en rad per djur) + provsvar, foder, extern flytt (till/från anläggningen).
 4. **Platser** — lista + kartvy (Leaflet/OSM) med grupper på plats, betesdagar.
 5. **Mer** — gårdsuppgifter, slakt & avräkning, slakterier, årsrapport, synkronisering.
 
