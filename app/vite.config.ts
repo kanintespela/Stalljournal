@@ -1,8 +1,23 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { execSync } from 'node:child_process'
+
+// Versionsinfo som visas under Mer, så att man kan se vilken version en
+// installerad app faktiskt kör: kort commit-hash + byggtidpunkt.
+function gitCommit(): string {
+  try {
+    return execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+  } catch {
+    return 'okänd'
+  }
+}
 
 export default defineConfig({
+  define: {
+    __APP_COMMIT__: JSON.stringify(gitCommit()),
+    __APP_BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     react(),
     VitePWA({

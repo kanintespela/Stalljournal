@@ -30,6 +30,21 @@ export default function AnimalsPage() {
     return new Set(ts.filter((t) => isInWithdrawal(t)).map((t) => t.animal_id))
   }, []) ?? new Set<string>()
 
+  // Senaste vägning per djur, visas för lamm (under ett år) i listan
+  const latestWeighing = useLiveQuery(async () => {
+    const ws = await db.weighings.filter((w) => w.deleted_at === null).toArray()
+    const latest = new Map<string, { date: string; weight_kg: number }>()
+    for (const w of ws) {
+      const cur = latest.get(w.animal_id)
+      if (!cur || w.date > cur.date) latest.set(w.animal_id, w)
+    }
+    return latest
+  }, [])
+
+  const oneYearAgo = new Date()
+  oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1)
+  const oneYearAgoStr = oneYearAgo.toISOString().slice(0, 10)
+
   return (
     <div className="page">
       <header className="page-header">
@@ -56,7 +71,10 @@ export default function AnimalsPage() {
         </p>
       ) : (
         <ul className="card-list">
-          {animals.map((a) => (
+          {animals.map((a) => {
+            const isLamb = !!a.birth_date && a.birth_date > oneYearAgoStr
+            const weighing = isLamb ? latestWeighing?.get(a.id) : undefined
+            return (
             <li key={a.id}>
               <Link to={`/djur/${a.id}`} className="card">
                 <div className="card-main">
@@ -68,6 +86,7 @@ export default function AnimalsPage() {
                     {a.sex === 'tacka' ? 'Tacka' : a.sex === 'bagge' ? 'Bagge' : ''}
                     {a.breed && ` · ${a.breed}`}
                     {a.birth_date && ` · f. ${a.birth_date}`}
+                    {weighing && ` · ${weighing.weight_kg.toLocaleString('sv-SE')} kg (${weighing.date})`}
                   </span>
                 </div>
                 <div className="card-badges">
@@ -78,7 +97,8 @@ export default function AnimalsPage() {
                 </div>
               </Link>
             </li>
-          ))}
+            )
+          })}
         </ul>
       )}
       {animals && animals.length > 0 && (

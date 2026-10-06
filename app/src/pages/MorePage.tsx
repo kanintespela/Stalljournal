@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom'
 import { isLoggedIn } from '../sync/client'
 
+// Byggtid i lokal tid, t.ex. "2026-10-06 14:32"
+const buildTime = new Date(__APP_BUILD_TIME__).toLocaleString('sv-SE', {
+  year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+})
+
 export default function MorePage() {
   return (
     <div className="page">
@@ -90,6 +95,7 @@ export default function MorePage() {
           </Link>
         </li>
       </ul>
+      <p className="count">Version {__APP_COMMIT__} · byggd {buildTime}</p>
     </div>
   )
 }
