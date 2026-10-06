@@ -3,8 +3,8 @@ import { db, newId, nowIso } from '../db/db'
 import type {
   Animal,
   AnimalStatus,
-  AppSetting,
   BodyCondition,
+  FarmSetting,
   Feeding,
   GroupMembership,
   GroupMove,
@@ -42,7 +42,7 @@ export interface ImportPlan {
   slaughterhouses: Slaughterhouse[]
   slaughters: Slaughter[]
   slaughterSettlements: SlaughterSettlement[]
-  appSettings: AppSetting[]
+  farmSettings: FarmSetting[]
   warnings: string[]
   counts: Record<string, number>
 }
@@ -524,10 +524,9 @@ export function buildImportPlan(wb: XLSX.WorkBook): ImportPlan {
   }
 
   // -- inställningar --
-  const appSettings: AppSetting[] = rowsOf(wb, 'inställningar').map((r) => ({
-    key: toStr(r.fältnamn),
-    value: toStr(r.värde),
-  }))
+  const farmSettings: FarmSetting[] = rowsOf(wb, 'inställningar')
+    .map((r) => ({ id: toStr(r.fältnamn), value: toStr(r.värde), updated_at: now, deleted_at: null }))
+    .filter((s) => s.id)
 
   const counts = {
     Djur: animals.length,
@@ -545,7 +544,7 @@ export function buildImportPlan(wb: XLSX.WorkBook): ImportPlan {
     Slakterier: slaughterhouses.length,
     Slakter: slaughters.length,
     Avräkningar: slaughterSettlements.length,
-    Inställningar: appSettings.length,
+    Inställningar: farmSettings.length,
   }
 
   return {
@@ -564,7 +563,7 @@ export function buildImportPlan(wb: XLSX.WorkBook): ImportPlan {
     slaughterhouses,
     slaughters,
     slaughterSettlements,
-    appSettings,
+    farmSettings,
     warnings,
     counts,
   }
@@ -590,7 +589,7 @@ export async function applyImportPlan(plan: ImportPlan): Promise<void> {
       db.slaughterhouses,
       db.slaughters,
       db.slaughter_settlements,
-      db.app_settings,
+      db.farm_settings,
     ],
     async () => {
       if (plan.places.length) await db.places.bulkAdd(plan.places)
@@ -608,9 +607,7 @@ export async function applyImportPlan(plan: ImportPlan): Promise<void> {
       if (plan.slaughterhouses.length) await db.slaughterhouses.bulkAdd(plan.slaughterhouses)
       if (plan.slaughters.length) await db.slaughters.bulkAdd(plan.slaughters)
       if (plan.slaughterSettlements.length) await db.slaughter_settlements.bulkAdd(plan.slaughterSettlements)
-      for (const s of plan.appSettings) {
-        if (s.key) await db.app_settings.put(s)
-      }
+      if (plan.farmSettings.length) await db.farm_settings.bulkPut(plan.farmSettings)
     },
   )
 }

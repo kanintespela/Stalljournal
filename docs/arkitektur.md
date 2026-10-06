@@ -17,6 +17,8 @@
 
 **Revision 8 (2026-08-06):** Dokument (`document`, fas 6c) hade samma lucka som foton och avelsegenskaper hade innan revision 4/5 — tabellen saknades helt i §3 och i synken, trots att den redan var byggd och användes lokalt. Åtgärdat på samma sätt som foton (revision 4): eget pull/push-par vid sidan av `TABLES` i `sync.ts`, eftersom dokumentet innehåller en binär fil (PDF/Excel). Till skillnad från `animal_photos.photo` är filfältet här satt till `protected: true` i PocketBase-migrationen — synkkoden hämtade redan en engångstoken innan nedladdning (samma mönster som foton), så skyddet kostar inget extra och stänger en lucka som flaggades i en tidigare säkerhetsgenomgång (foton hade av misstag `protected: false`). Efter detta har all data i modellen utom `app_setting` en motsvarighet på servern och synkas.
 
+**Revision 9 (2026-10-06):** Gårdsuppgifterna synkas nu (ny tabell/collection `farm_setting`/`farm_settings`) — tidigare låg de i den lokala `app_setting` och måste fyllas i separat på varje enhet, vilket i praktiken gjorde att de saknades på alla utom en. `farm_setting` har nyckeln som `id` (inte ett uuid), så samma uppgift ifylld på två enheter blir samma rad och last-write-wins avgör per uppgift. Dexie v6 flyttar över befintliga ifyllda värden (tomma hoppas över, så en enhet som aldrig fyllt i något inte skriver över en annans uppgifter) och v7 tar bort `app_settings`. Efter detta synkas all data i modellen.
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -131,10 +133,13 @@ document(id, category, title, date, animal_id?→animal, group_id?→herd_group,
           -- foderanalys, träckprovsanalys, ansökan m.m. (se domanoversikt.md);
           -- fotograferade pappersdokument görs om till PDF i klienten
 
-app_setting(key, value)
+farm_setting(id = nyckel, value)
+          -- gårdsuppgifter (namn, adress, SE-nummer, fordon …); id är
+          -- nyckeln (t.ex. "farm_name"), inte ett uuid, så samma uppgift
+          -- från två enheter blir samma rad
 ```
 
-Alla tabeller ovan får dessutom `updated_at` och `deleted_at` och synkas mot servern (se §2 och `app/src/sync/sync.ts`). **Undantaget är `app_setting`**: rent lokal enhetskonfiguration (t.ex. importinställningar) utan `updated_at`/`deleted_at` — den är avsiktligt inte en del av datamodellen som delas mellan enheter. Servern (PocketBase) delas av alla på gården — det finns ingen gårds- eller kontoindelning i modellen, eftersom appen är byggd för en enskild gårds betrodda användare, inte som en flergårdstjänst.
+Alla tabeller ovan får dessutom `updated_at` och `deleted_at` och synkas mot servern (se §2 och `app/src/sync/sync.ts`). Det som är rent enhetsspecifikt (synkserverns adress, inloggning, synkens vattenmärken) ligger i `localStorage`, inte i datamodellen. Servern (PocketBase) delas av alla på gården — det finns ingen gårds- eller kontoindelning i modellen, eftersom appen är byggd för en enskild gårds betrodda användare, inte som en flergårdstjänst.
 
 ### Designprinciper i datamodellen
 
