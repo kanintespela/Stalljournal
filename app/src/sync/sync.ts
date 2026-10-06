@@ -67,6 +67,7 @@ const TABLES: TableSpec[] = [
   { local: 'trait_records', collection: 'trait_records' },
   { local: 'animal_movements', collection: 'animal_movements' },
   { local: 'farm_settings', collection: 'farm_settings' },
+  { local: 'journal_notes', collection: 'journal_notes', nullableText: ['animal_id', 'group_id'] },
 ]
 
 const PULL_WATERMARK_KEY = 'stalljournal_sync_pull'

@@ -7,6 +7,7 @@ import { ANIMAL_STATUS_LABELS, MOVEMENT_DIRECTION_LABELS, expectedLambingDate, i
 import { groupsForAnimal } from '../logic/herd'
 import { forecastTargetWeight } from '../logic/growthForecast'
 import { activePregnancy } from '../logic/breeding'
+import { notesForAnimal } from '../logic/notes'
 import { describeKinship, kinshipCoefficient } from '../logic/pedigree'
 import PhotoGallery from '../components/PhotoGallery'
 import AnimalTraits from '../components/AnimalTraits'
@@ -103,6 +104,12 @@ export default function AnimalDetailPage() {
     const rows = await db.slaughters.where('animal_id').equals(id).toArray()
     return rows.filter((s) => s.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
+  const samples = useLiveQuery(async () => {
+    if (!id) return []
+    const rows = await db.parasite_samples.where('animal_id').equals(id).toArray()
+    return rows.filter((s) => s.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
+  }, [id])
+  const notes = useLiveQuery(() => (id ? notesForAnimal(id) : []), [id])
   const movements = useLiveQuery(async () => {
     if (!id) return []
     const rows = await db.animal_movements.where('animal_id').equals(id).toArray()
@@ -131,7 +138,7 @@ export default function AnimalDetailPage() {
   // Ångra en felregistrerad journalrad (soft delete). Djurets status/grupper
   // återställs inte automatiskt — det sägs i bekräftelsen när det är relevant.
   async function removeRow(
-    table: 'weighings' | 'treatments' | 'body_conditions' | 'animal_movements' | 'lambings' | 'matings',
+    table: 'weighings' | 'treatments' | 'body_conditions' | 'animal_movements' | 'lambings' | 'matings' | 'parasite_samples' | 'journal_notes',
     id: string,
     label: string,
     extra = '',
@@ -183,6 +190,7 @@ export default function AnimalDetailPage() {
         )}
         <Link to={`/journal/hull?djur=${animal.id}`} className="btn">Hull</Link>
         <Link to={`/journal/flytt?djur=${animal.id}`} className="btn">Extern flytt</Link>
+        <Link to={`/journal/anteckning?djur=${animal.id}`} className="btn">Anteckning</Link>
       </div>
 
       <PhotoGallery animalId={animal.id} />
@@ -400,6 +408,47 @@ export default function AnimalDetailPage() {
                 {c.date}: <strong>{c.score}</strong>
                 {c.note && <span className="muted"> — {c.note}</span>}
                 <button className="link-btn" onClick={() => removeRow('body_conditions', c.id, `hullbedömningen ${c.date}`)}>
+                  Ta bort
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {notes && notes.length > 0 && (
+        <section className="section">
+          <h2>Anteckningar ({notes.length})</h2>
+          <ul className="link-list">
+            {notes.map(({ note, viaGroup }) => (
+              <li key={note.id}>
+                {note.date}: <strong>{note.category}</strong> — {note.text}
+                {viaGroup ? (
+                  <span className="muted"> (via gruppen <Link to={`/grupper/${viaGroup.id}`}>{viaGroup.name}</Link>)</span>
+                ) : (
+                  <>
+                    {' '}<Link to={`/journal/anteckning/${note.id}`} className="link-btn">Ändra</Link>
+                    <button className="link-btn" onClick={() => removeRow('journal_notes', note.id, `anteckningen ${note.date} (${note.category})`)}>
+                      Ta bort
+                    </button>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {samples && samples.length > 0 && (
+        <section className="section">
+          <h2>Provtagningar ({samples.length})</h2>
+          <ul className="link-list">
+            {samples.map((s) => (
+              <li key={s.id}>
+                {s.date}: <strong>{s.type}</strong>
+                {s.result && ` — ${s.result}`}
+                {s.note && <span className="muted"> ({s.note})</span>}
+                <button className="link-btn" onClick={() => removeRow('parasite_samples', s.id, `provtagningen ${s.date} (${s.type})`)}>
                   Ta bort
                 </button>
               </li>

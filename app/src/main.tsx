@@ -20,6 +20,7 @@ import MatingFormPage from './pages/MatingFormPage'
 import BodyConditionFormPage from './pages/BodyConditionFormPage'
 import AnimalMovementFormPage from './pages/AnimalMovementFormPage'
 import ParasiteSampleFormPage from './pages/ParasiteSampleFormPage'
+import NoteFormPage from './pages/NoteFormPage'
 import FeedingFormPage from './pages/FeedingFormPage'
 import MorePage from './pages/MorePage'
 import FarmPage from './pages/FarmPage'
@@ -98,6 +99,8 @@ const router = createBrowserRouter([
       { path: 'journal/flytt', element: <AnimalMovementFormPage /> },
       { path: 'journal/trackprov', element: <ParasiteSampleFormPage /> },
       { path: 'journal/foder', element: <FeedingFormPage /> },
+      { path: 'journal/anteckning', element: <NoteFormPage /> },
+      { path: 'journal/anteckning/:id', element: <KeyByParam Component={NoteFormPage} /> },
       { path: 'mer', element: <MorePage /> },
       { path: 'mer/gard', element: <FarmPage /> },
       { path: 'mer/slakt', element: <SlaughtersPage /> },

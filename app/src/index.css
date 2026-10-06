@@ -294,6 +294,9 @@ code { background: var(--card); border: 1px solid var(--border); border-radius: 
   font-size: 0.95rem;
 }
 .checkbox-list input { width: 20px; height: 20px; flex-shrink: 0; }
+/* Inne i .form är etiketter kolumner — massval och växlare ska ligga på en rad. */
+.form .checkbox-list label, .form label.toggle { flex-direction: row; align-items: center; }
+.form .toggle input { width: 18px; height: 18px; padding: 0; }
 
 .sticky-footer {
   position: fixed;

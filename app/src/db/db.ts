@@ -13,6 +13,7 @@ import type {
   Lambing,
   Mating,
   ParasiteSample,
+  JournalNote,
   Place,
   Slaughter,
   Slaughterhouse,
@@ -47,6 +48,7 @@ export class StalljournalDB extends Dexie {
   documents!: Table<Document, string>
   animal_movements!: Table<AnimalMovement, string>
   farm_settings!: Table<FarmSetting, string>
+  journal_notes!: Table<JournalNote, string>
 
   constructor() {
     super('stalljournal')
@@ -104,6 +106,10 @@ export class StalljournalDB extends Dexie {
     // v7: app_settings används inte längre (allt flyttat till farm_settings i v6).
     this.version(7).stores({
       app_settings: null,
+    })
+    // v8: fria journalanteckningar för djur eller grupp (blodprov, veterinärbesök …).
+    this.version(8).stores({
+      journal_notes: 'id, animal_id, group_id, date, updated_at',
     })
   }
 }

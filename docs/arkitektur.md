@@ -19,6 +19,8 @@
 
 **Revision 9 (2026-10-06):** Gårdsuppgifterna synkas nu (ny tabell/collection `farm_setting`/`farm_settings`) — tidigare låg de i den lokala `app_setting` och måste fyllas i separat på varje enhet, vilket i praktiken gjorde att de saknades på alla utom en. `farm_setting` har nyckeln som `id` (inte ett uuid), så samma uppgift ifylld på två enheter blir samma rad och last-write-wins avgör per uppgift. Dexie v6 flyttar över befintliga ifyllda värden (tomma hoppas över, så en enhet som aldrig fyllt i något inte skriver över en annans uppgifter) och v7 tar bort `app_settings`. Efter detta synkas all data i modellen.
 
+**Revision 10 (2026-10-06):** Ny tabell `journal_note` — fri journalanteckning (datum, kategori, text) för ett djur eller en grupp, för händelser utan eget formulär (t.ex. blodprov för MV-programmet, veterinärbesök, klövverkning). Flera markerade djur ger en rad per djur (samma mönster som gruppbehandling och extern flytt). En gruppanteckning lagras bara en gång på gruppen; att den också visas på djurkorten för de djur som var med i gruppen det datumet räknas fram ur `group_membership` och lagras aldrig per djur. Synkas som vanlig JSON-tabell i `TABLES` (collection `journal_notes`).
+
 ---
 
 ## 0. Varför PWA — och vad det innebär
@@ -114,6 +116,9 @@ parasite_sample(id, date, animal_id?→animal, group_id?→herd_group, type,
                 result, note, file_path, trichostrongylida, haemonchus_pct,
                 t_axei_pct, chab_oes, n_filaria, n_spathiger, n_battus, capillaria)
 feeding(id, group_id→herd_group, date, feed_type, amount, note)
+journal_note(id, date, animal_id?→animal, group_id?→herd_group, category, text)
+          -- fri anteckning; exakt ett av animal_id/group_id är satt. En gruppanteckning
+          -- visas även på djur som var gruppmedlemmar det datumet: BERÄKNAS
 
 slaughterhouse(id, name, address, contact, phone, email)
 slaughter(id, animal_id→animal, slaughterhouse_id→slaughterhouse, date,
@@ -162,6 +167,7 @@ Körs som lokala transaktioner — fungerar offline, synkas som vanliga radändr
 | **Nytt djur utifrån** ✅ | "Djuret kommer utifrån"-kryssruta i djurformuläret | Skapar `animal`-raden + en `animal_movement`-rad (riktning = in) i samma transaktion, så en inköpt/mottagen djurpost aldrig saknar sin förflyttningspost. |
 | **Extern flytt, flera djur** ✅ | "Extern flytt"-formuläret, kryssrutor | Skapar en `animal_movement`-rad per markerat djur (samma mönster som gruppbehandling). |
 | **Utgång via extern flytt** ✅ | "Ut"-flytt med explicit statusval (såld/slaktad/utgången) | Sätter djurens status + `exit_date` + `exit_reason` och avslutar öppna gruppmedlemskap, i samma transaktion som flyttraderna — samma mönster som slakt. Valet är alltid explicit, aldrig härlett ur motpartens fritext. |
+| **Anteckning, flera djur eller grupp** ✅ | "Anteckning"-formuläret | Markerade djur → en `journal_note`-rad per djur. Grupp → en rad med `group_id`; visas på djurkortet för djur vars `group_membership` täcker anteckningens datum. |
 | **Ångra journalrad** ✅ | "Ta bort" på raden i djurdetaljvyn | Soft delete (`deleted_at`) av förflyttning/vägning/hull/behandling/betäckning/lamning — synkas som borttagning till andra enheter. Återställer inte sidoeffekter (t.ex. statusändring från en flytt, eller lamm skapade av en lamning); bekräftelsedialogen upplyser om det. |
 | **Karensvakt** | Härledd, visas löpande | Djur med pågående karens flaggas i djurlistan och blockerar slaktregistrering med varning. |
 | **Dräktighetsprognos** | Härledd | Beräknad lamning = `mating.start_date + 147 dagar`. |
@@ -173,7 +179,7 @@ Bottennav (5 flikar):
 
 1. **Djur** — sökbar lista (filter: aktiva/alla), detaljvy med flikar: översikt/härstamning, viktkurva (diagram), behandlingar + karensstatus, lamningar, hull, slakt.
 2. **Grupper** — grupper med aktuellt antal och plats; gruppdetalj med medlemmar, flytta-knapp, gruppbehandling, foder.
-3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, foder, extern flytt (till/från anläggningen).
+3. **Journal** — samlad registreringsingång: vägning, behandling, lamning, betäckning, hull, träckprov, foder, anteckning (djur eller grupp), extern flytt (till/från anläggningen).
 4. **Platser** — lista + kartvy (Leaflet/OSM) med grupper på plats, betesdagar.
 5. **Mer** — gårdsuppgifter, slakt & avräkning, slakterier, årsrapport, synkronisering.
 
