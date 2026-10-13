@@ -76,6 +76,14 @@ export default function MorePage() {
           </Link>
         </li>
         <li>
+          <Link to="/mer/tackfacit" className="card">
+            <div className="card-main">
+              <span className="card-title">Tackfacit</span>
+              <span className="card-meta">Vad tackornas avkommor gett vid slakt — vikt, EUROP-klass och slaktvärde</span>
+            </div>
+          </Link>
+        </li>
+        <li>
           <Link to="/mer/synk" className="card">
             <div className="card-main">
               <span className="card-title">Synkronisering</span>

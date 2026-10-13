@@ -28,6 +28,7 @@ import TraitsPage from './pages/TraitsPage'
 import TraitDetailPage from './pages/TraitDetailPage'
 import GrowthComparisonPage from './pages/GrowthComparisonPage'
 import WeightForecastPage from './pages/WeightForecastPage'
+import EweResultsPage from './pages/EweResultsPage'
 import SlaughtersPage from './pages/SlaughtersPage'
 import SlaughterFormPage from './pages/SlaughterFormPage'
 import SlaughterhousesPage from './pages/SlaughterhousesPage'
@@ -115,6 +116,7 @@ const router = createBrowserRouter([
       { path: 'mer/egenskaper/:id', element: <KeyByParam Component={TraitDetailPage} /> },
       { path: 'mer/tillvaxt', element: <GrowthComparisonPage /> },
       { path: 'mer/viktprognos', element: <WeightForecastPage /> },
+      { path: 'mer/tackfacit', element: <EweResultsPage /> },
     ],
   },
 ], { basename })

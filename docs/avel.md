@@ -51,6 +51,23 @@ Till trädet hör en beräknad **släktskapsgrad (inavelskoefficient)**, med Wri
 
 Samma ärlighetsprincip som resten av avelsverktygen gäller: en okänd anfader räknas som obesläktad i beräkningen. Det innebär att den verkliga släktskapsgraden kan vara högre än den visade siffran om anorna bakom en inköpt bagge i själva verket är släkt med besättningens egna djur — appen har helt enkelt ingen data om det.
 
+### Tackfacit (Mer → Tackfacit, samt tackans djurkort)
+Svarar på frågan "hur mycket ger den här tackan?". Det vedertagna måttet på en tackas produktion är **kg lamm per tacka och år**; med appens slaktdata mäts det i kg slaktkropp i stället för levande vikt, kompletterat med vad slaktkropparna faktiskt var värda och hur de klassades.
+
+Per tacka visas:
+
+- **Slaktvärde (brutto)** — kilopris × slaktvikt per slaktad avkomma, samma beräkning som slaktintäkten i övrigt i appen (alltså före slaktavgift och transport). Totalt och per lamning. Avkommor där vikt eller kilopris saknas flaggas, eftersom summan då blir för låg.
+- **Kg slaktkropp** totalt och per lamning, samt medelslaktvikt.
+- **EUROP-klassfördelning** (t.ex. "R+ 2 · R 3 · O 1") och en medelklass. Medelklassen räknas fram genom att klasserna översätts till en poängskala i ordningen E, U, R+, R, R-, O+, O, O-, P+, P, P- och avrundas tillbaka till närmaste klass. Fettgruppen behandlas på samma sätt.
+- **Ålder vid slakt** (medel) — samma slaktvikt tidigare är värt mer.
+- Lamningar, levande och döda födda, och vad som hänt med avkommorna: slaktade, **behållna** (levande i besättningen och äldre än ett år — typiskt rekrytering), **ej avgjorda** (yngre levande lamm) och sålda/döda/övrigt. Behållna och ej avgjorda drar inte ner tackans resultat — de har bara inte gett något slaktvärde (ännu).
+
+**Perioder.** *Hela livet* summerar allt. *Valt år* tar med tackans lamningar det året och avkommor **födda** det året — avkomman räknas alltså till lamningsåret även om den slaktas året efter, eftersom det är tackans produktion det året som mäts. *Snitt per år* delar livets summor med antal år från tackans första lamningsår till hennes sista lamningsår (om hon har lämnat besättningen) eller besättningens senaste lamningsår (om hon är kvar). Ett år utan lamning räknas därmed med — det är ju ett år hon inte producerade — men innevarande år räknas inte förrän någon i besättningen har lammat. Snittet gör unga och gamla tackor jämförbara.
+
+Avkommor knyts till tackan via `mother_id` och födelsedatum (eller lamningens datum om födelsedatum saknas). Precis som övriga avelsverktyg märks tackor med färre än tre slaktade avkommor som osäkert underlag. Kullstorleken syns via antal levande födda per lamning — en tacka med trillingar ger ofta lättare lamm men fler kilo totalt, vilket är just vad "per lamning"-måtten fångar.
+
+Allt räknas fram när sidan visas (`app/src/logic/eweResults.ts`), inget lagras och ingen ny synkad tabell behövs.
+
 ## 3. Kvarstående idéer
 
 Fler egenskaper och testprotokoll kan läggas till efter hand — det är hela poängen med att egenskaperna är fritt definierade snarare än en fast lista.

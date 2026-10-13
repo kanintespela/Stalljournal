@@ -9,9 +9,11 @@ import { forecastTargetWeight } from '../logic/growthForecast'
 import { activePregnancy } from '../logic/breeding'
 import { notesForAnimal } from '../logic/notes'
 import { describeKinship, kinshipCoefficient } from '../logic/pedigree'
+import { eweResult } from '../logic/eweResults'
 import PhotoGallery from '../components/PhotoGallery'
 import AnimalTraits from '../components/AnimalTraits'
 import DocumentList from '../components/DocumentList'
+import EweResultFacts from '../components/EweResultFacts'
 
 const WeightChart = lazy(() => import('../components/WeightChart'))
 
@@ -110,6 +112,10 @@ export default function AnimalDetailPage() {
     return rows.filter((s) => s.deleted_at === null).sort((a, b) => b.date.localeCompare(a.date))
   }, [id])
   const notes = useLiveQuery(() => (id ? notesForAnimal(id) : []), [id])
+  const eweFacit = useLiveQuery(
+    () => (id && animal?.sex === 'tacka' ? eweResult(id, { kind: 'life' }) : null),
+    [id, animal?.sex],
+  )
   const movements = useLiveQuery(async () => {
     if (!id) return []
     const rows = await db.animal_movements.where('animal_id').equals(id).toArray()
@@ -396,6 +402,16 @@ export default function AnimalDetailPage() {
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {eweFacit && (
+        <section className="section">
+          <div className="section-header">
+            <h2>Tackfacit (hela livet)</h2>
+            <Link to="/mer/tackfacit">Jämför ›</Link>
+          </div>
+          <EweResultFacts r={eweFacit} showOffspring={false} />
         </section>
       )}
 

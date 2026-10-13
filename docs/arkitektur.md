@@ -171,6 +171,7 @@ Körs som lokala transaktioner — fungerar offline, synkas som vanliga radändr
 | **Ångra journalrad** ✅ | "Ta bort" på raden i djurdetaljvyn | Soft delete (`deleted_at`) av förflyttning/vägning/hull/behandling/betäckning/lamning — synkas som borttagning till andra enheter. Återställer inte sidoeffekter (t.ex. statusändring från en flytt, eller lamm skapade av en lamning); bekräftelsedialogen upplyser om det. |
 | **Karensvakt** | Härledd, visas löpande | Djur med pågående karens flaggas i djurlistan och blockerar slaktregistrering med varning. |
 | **Dräktighetsprognos** | Härledd | Beräknad lamning = `mating.start_date + 147 dagar`. |
+| **Tackfacit** | Mer → Tackfacit, samt tackans djurkort | Härleds ur `lambing` (tackans lamningar), `animal.mother_id` (avkommor) och genomförda `slaughter`-rader: slaktkroppsvikt, EUROP-klassfördelning, fettgrupp och slaktvärde (brutto) per tacka, för hela livet, snitt per år eller ett valt år. Inget lagras. Se `docs/avel.md`. |
 | **Årsrapport** | Rapportknapp | Produktionsuppföljning för valt år: lamningsresultat (lamm/tacka, dödlighet), tillväxt (medeldaglig viktökning), slaktutfall (vikter, klassning, intäkt), läkemedelsanvändning, besättningsutveckling. Utskriftsvänlig → PDF via delningsmenyn. |
 
 ## 5. Skärmstruktur

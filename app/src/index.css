@@ -191,6 +191,8 @@ h3 { font-size: 0.95rem; margin: 12px 0 4px; }
 .facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; }
 .facts dt { color: var(--muted); font-size: 0.85rem; }
 .facts dd { margin: 0; font-size: 0.95rem; }
+.ewe-result summary { cursor: pointer; font-size: 0.95rem; }
+.details-body { margin-top: 10px; }
 .link-list { margin: 4px 0 0; padding-left: 18px; font-size: 0.95rem; }
 .link-list li { margin-bottom: 4px; }
 a { color: var(--green); }
