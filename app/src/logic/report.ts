@@ -1,5 +1,6 @@
 import { db } from '../db/db'
 import { slaughterIncome } from '../db/types'
+import { GRADE_OPTIONS } from './slaughter'
 
 // Årsrapport för egen produktionsuppföljning (arkitektur.md §4).
 
@@ -85,10 +86,18 @@ export async function computeYearReport(year: number): Promise<YearReport> {
   // Slakt
   const weights = slaughters.map((s) => s.carcass_weight).filter((w): w is number => w != null)
   const totalIncome = slaughters.reduce((sum, s) => sum + (slaughterIncome(s) ?? 0), 0)
-  const grades: Record<string, number> = {}
+  const gradeCounts: Record<string, number> = {}
   for (const s of slaughters) {
-    if (s.grade) grades[s.grade] = (grades[s.grade] ?? 0) + 1
+    if (s.grade) gradeCounts[s.grade] = (gradeCounts[s.grade] ?? 0) + 1
   }
+  // EUROP-ordning (E bäst → P); okända/importerade klasser sist.
+  const gradeRank = (g: string) => {
+    const i = (GRADE_OPTIONS as readonly string[]).indexOf(g)
+    return i === -1 ? GRADE_OPTIONS.length : i
+  }
+  const grades: Record<string, number> = Object.fromEntries(
+    Object.entries(gradeCounts).sort(([a], [b]) => gradeRank(a) - gradeRank(b) || a.localeCompare(b)),
+  )
 
   // Läkemedel
   const byDrug: Record<string, number> = {}
