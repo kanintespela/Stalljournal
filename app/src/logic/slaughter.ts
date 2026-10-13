@@ -44,5 +44,5 @@ export async function withdrawalConflict(animalId: string, slaughterDate: string
     })
 }
 
-export const GRADE_OPTIONS = ['E', 'U', 'R+', 'R', 'R-', 'O+', 'O', 'O-', 'P'] as const
+export const GRADE_OPTIONS = ['E', 'U', 'R+', 'R', 'R-', 'O+', 'O', 'O-', 'P+', 'P', 'P-'] as const
 export const FAT_CLASS_OPTIONS = ['1', '2-', '2', '2+', '3-', '3', '3+', '4-', '4', '4+', '5'] as const
