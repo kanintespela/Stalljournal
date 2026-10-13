@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../db/db'
-import { activeMembersWithAnimals, dagarText, daysBetween, openMove } from '../logic/herd'
+import { activeMembersWithAnimals, dagarText, daysBetween, groupEmptiedOn, openMove } from '../logic/herd'
 
 export default function GroupsPage() {
   const groups = useLiveQuery(async () => {
@@ -11,11 +11,13 @@ export default function GroupsPage() {
         const members = await activeMembersWithAnimals(g.id)
         const move = await openMove(g.id)
         const place = move ? await db.places.get(move.place_id) : undefined
+        // Tom grupp: räknaren stannar den dag sista djuret lämnade.
+        const emptiedOn = move ? await groupEmptiedOn(g.id, move.moved_on) : null
         return {
           group: g,
           count: members.filter((m) => m.animal.status === 'active').length,
           placeName: place?.name ?? null,
-          days: move ? daysBetween(move.moved_on, null) : null,
+          days: move ? daysBetween(move.moved_on, emptiedOn) : null,
         }
       }),
     )

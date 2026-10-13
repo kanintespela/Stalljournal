@@ -1,7 +1,7 @@
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { db, nowIso, todayStr } from '../db/db'
-import { activeMembersWithAnimals, dagarText, daysBetween, endMembership, openMove } from '../logic/herd'
+import { activeMembersWithAnimals, dagarText, daysBetween, endMembership, groupEmptiedOn, openMove } from '../logic/herd'
 import { notesForGroup } from '../logic/notes'
 import DocumentList from '../components/DocumentList'
 
@@ -12,6 +12,11 @@ export default function GroupDetailPage() {
   const group = useLiveQuery(() => (id ? db.herd_groups.get(id) : undefined), [id])
   const members = useLiveQuery(() => (id ? activeMembersWithAnimals(id) : []), [id])
   const move = useLiveQuery(() => (id ? openMove(id) : undefined), [id])
+  // Tom grupp (t.ex. efter slakt): placeringens dagräknare stannar den dag sista djuret lämnade.
+  const emptiedOn = useLiveQuery(
+    () => (id && move ? groupEmptiedOn(id, move.moved_on) : null),
+    [id, move?.id, move?.moved_on],
+  )
   const place = useLiveQuery(() => (move ? db.places.get(move.place_id) : undefined), [move?.place_id])
 
   const history = useLiveQuery(async () => {
@@ -79,7 +84,9 @@ export default function GroupDetailPage() {
         {!group.active && <span className="badge">Inaktiv</span>}
         {place && (
           <span className="badge">
-            {place.name}{move && ` · ${dagarText(daysBetween(move.moved_on, null))}`}
+            {place.name}
+            {move && emptiedOn !== undefined && ` · ${dagarText(daysBetween(move.moved_on, emptiedOn))}`}
+            {emptiedOn && ` (tom sedan ${emptiedOn})`}
           </span>
         )}
       </p>
@@ -125,7 +132,13 @@ export default function GroupDetailPage() {
             {history.map(({ move: m, placeName }) => (
               <li key={m.id}>
                 {m.moved_on} → <strong>{placeName}</strong>
-                {' '}({dagarText(daysBetween(m.moved_on, m.ended_on))}{m.ended_on ? '' : ', pågår'})
+                {' '}(
+                {m.ended_on
+                  ? dagarText(daysBetween(m.moved_on, m.ended_on))
+                  : emptiedOn
+                    ? `${dagarText(daysBetween(m.moved_on, emptiedOn))}, tom sedan ${emptiedOn}`
+                    : `${dagarText(daysBetween(m.moved_on, null))}, pågår`}
+                )
                 {m.note && <span className="muted"> — {m.note}</span>}
               </li>
             ))}

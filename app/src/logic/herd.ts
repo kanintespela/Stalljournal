@@ -27,6 +27,29 @@ export async function openMove(groupId: string): Promise<GroupMove | undefined> 
     .sort((a, b) => b.moved_on.localeCompare(a.moved_on))[0]
 }
 
+/**
+ * Dagen gruppen blev tom på aktiva djur, eller null om den har aktiva djur kvar.
+ * Används för att stoppa dagräknaren för gruppens placering — en tom grupp
+ * (t.ex. efter slakt) står inte längre på något bete. Härleds ur medlemskapens
+ * slutdatum och djurens utgångsdatum; lagras aldrig. Har gruppen aldrig haft
+ * djur blir resultatet `fallback` (typiskt placeringens startdatum).
+ */
+export async function groupEmptiedOn(groupId: string, fallback: string): Promise<string | null> {
+  const ms = (await db.group_memberships.where('group_id').equals(groupId).toArray()).filter(
+    (m) => m.deleted_at === null,
+  )
+  const animals = await db.animals.bulkGet(ms.map((m) => m.animal_id))
+  let last: string | null = null
+  for (const [i, m] of ms.entries()) {
+    const a = animals[i]
+    if (!a || a.deleted_at !== null) continue
+    if (m.removed_on === null && a.status === 'active') return null
+    const end = m.removed_on ?? a.exit_date ?? m.added_on
+    if (last === null || end > last) last = end
+  }
+  return last ?? fallback
+}
+
 /** Flytta grupp: stäng föregående öppna flytt och skapa en ny. */
 export async function moveGroup(groupId: string, placeId: string, movedOn: string, note: string): Promise<void> {
   await db.transaction('rw', db.group_moves, async () => {
