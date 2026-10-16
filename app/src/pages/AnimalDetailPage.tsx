@@ -194,6 +194,9 @@ export default function AnimalDetailPage() {
         {animal.sex === 'tacka' && animal.status === 'active' && (
           <Link to={`/journal/lamning?tacka=${animal.id}`} className="btn">Lamning</Link>
         )}
+        {animal.sex === 'tacka' && animal.status === 'active' && (
+          <Link to={`/journal/betackning?tacka=${animal.id}`} className="btn">Märkt av bagge</Link>
+        )}
         <Link to={`/journal/hull?djur=${animal.id}`} className="btn">Hull</Link>
         <Link to={`/journal/flytt?djur=${animal.id}`} className="btn">Extern flytt</Link>
         <Link to={`/journal/anteckning?djur=${animal.id}`} className="btn">Anteckning</Link>

@@ -72,6 +72,8 @@ När en lamning registreras (tacka, datum, antal levande/döda lamm) skapas auto
 ### Betäckning och dräktighet
 En betäckning registreras med tacka, bagge och startdatum. Utifrån fårets dräktighetstid (ca 147 dagar) beräknas ett förväntat lamningsdatum automatiskt, som en prognos fram tills lamningen faktiskt registreras.
 
+Används märkfärg/märksele på baggen kan man direkt på tackans djurkort trycka **Märkt av bagge** och ange märkdatumet — det sparas som en vanlig betäckning med märkdatumet som startdatum, vilket ger en mer exakt prognos än betäckningsperiodens början. Baggen förväljs om exakt en aktiv bagge går i någon av tackans grupper. Blir tackan märkt igen (omlöpning) registreras en ny märkning; prognosen utgår alltid från den senaste.
+
 ### Behandlingar och karens
 Varje läkemedelsbehandling registreras med djur, preparat, dos, orsak och **karenstid** — antal dagar efter behandling som djuret inte får slaktas eller dess produkter användas. Appen räknar fram karensens sista dag automatiskt och varnar tydligt om ett djur med pågående karens riskerar att slaktas för tidigt. Behandlingar kan även registreras för en hel grupp på en gång, vilket skapar en journalpost per djur i gruppen — viktigt vid t.ex. avmaskning av en hel flock.
 

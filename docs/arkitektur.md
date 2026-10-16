@@ -170,7 +170,7 @@ Körs som lokala transaktioner — fungerar offline, synkas som vanliga radändr
 | **Anteckning, flera djur eller grupp** ✅ | "Anteckning"-formuläret | Markerade djur → en `journal_note`-rad per djur. Grupp → en rad med `group_id`; visas på djurkortet för djur vars `group_membership` täcker anteckningens datum. |
 | **Ångra journalrad** ✅ | "Ta bort" på raden i djurdetaljvyn | Soft delete (`deleted_at`) av förflyttning/vägning/hull/behandling/betäckning/lamning — synkas som borttagning till andra enheter. Återställer inte sidoeffekter (t.ex. statusändring från en flytt, eller lamm skapade av en lamning); bekräftelsedialogen upplyser om det. |
 | **Karensvakt** | Härledd, visas löpande | Djur med pågående karens flaggas i djurlistan och blockerar slaktregistrering med varning. |
-| **Dräktighetsprognos** | Härledd | Beräknad lamning = `mating.start_date + 147 dagar`. |
+| **Dräktighetsprognos** | Härledd | Beräknad lamning = senaste `mating.start_date + 147 dagar` (`GESTATION_DAYS`). "Märkt av bagge" på tackans djurkort skapar en vanlig `mating`-rad med märkdatumet som `start_date` — ingen egen datatyp. |
 | **Tackfacit** | Mer → Tackfacit, samt tackans djurkort | Härleds ur `lambing` (tackans lamningar), `animal.mother_id` (avkommor) och genomförda `slaughter`-rader: slaktkroppsvikt, EUROP-klassfördelning, fettgrupp och slaktvärde (brutto) per tacka, för hela livet, snitt per år eller ett valt år. Inget lagras. Se `docs/avel.md`. |
 | **Årsrapport** | Rapportknapp | Produktionsuppföljning för valt år: lamningsresultat (lamm/tacka, dödlighet), tillväxt (medeldaglig viktökning), slaktutfall (vikter, klassning, intäkt), läkemedelsanvändning, besättningsutveckling. Utskriftsvänlig → PDF via delningsmenyn. |
 

@@ -221,10 +221,15 @@ export function isInWithdrawal(t: Pick<Treatment, 'date' | 'withdrawal_days'>, t
   return until >= d0
 }
 
-/** Dräktighet får ~147 dagar: beräknad lamning från betäckningsstart. */
+/** Fårets dräktighetstid i dagar (snitt; normalt spann ca 142–152 beroende på ras). */
+export const GESTATION_DAYS = 147
+
+/** Beräknad lamning från betäckningsstart (eller märkdatum), som lokal kalenderdag. */
 export function expectedLambingDate(m: Pick<Mating, 'start_date'>): Date {
-  const d = new Date(m.start_date)
-  d.setDate(d.getDate() + 147)
+  // Tolka datumet som lokal midnatt — `new Date('YYYY-MM-DD')` blir UTC och kan
+  // annars hamna på fel dag när sommartid börjar/slutar under dräktigheten.
+  const d = new Date(`${m.start_date}T00:00:00`)
+  d.setDate(d.getDate() + GESTATION_DAYS)
   return d
 }
 
