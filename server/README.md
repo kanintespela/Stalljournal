@@ -12,6 +12,8 @@ Kör du redan en server sedan tidigare räcker det att kopiera in migrationsfile
 
 Migrationerna är skrivna för **PocketBase v0.39.x** (nyare versioner byter ibland API för migrationsfiler och adminkommandon — kontrollera `./pocketbase --version` mot [releaselistan](https://github.com/pocketbase/pocketbase/releases) om du installerar en nyare version och migrationerna inte verkar ta).
 
+> **PocketBase flyttar från GitHub.** Nya versioner kommer bara att finnas på en ny adress. Länken nedan till v0.39.9 fortsätter fungera. Se [../docs/pocketbase-flytten.md](../docs/pocketbase-flytten.md) innan du uppdaterar.
+
 ```bash
 # 1. Hämta PocketBase (byt ut mot din plattform, se https://pocketbase.io/docs/)
 curl -LO https://github.com/pocketbase/pocketbase/releases/download/v0.39.9/pocketbase_0.39.9_linux_amd64.zip

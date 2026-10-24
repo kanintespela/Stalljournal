@@ -16,6 +16,8 @@ Det här är fas 5b: flera personer på gården ska kunna se och redigera samma 
 
 Migrationerna i repot (`server/pb_migrations/`) är skrivna för **PocketBase v0.39.x**. PocketBase har ibland ändrat migrations-API:t mellan större versioner — installera helst just v0.39.x för att slippa krångel; installerar du en nyare version och migrationerna inte verkar ta (`./pocketbase migrate up` säger "No new migrations" utan att skapa tabellerna), jämför `./pocketbase --version` mot [releaselistan](https://github.com/pocketbase/pocketbase/releases) och hör av dig så uppdaterar vi migrationerna.
 
+> **PocketBase flyttar från GitHub.** Nya versioner kommer bara att finnas på en ny adress. Länken nedan till v0.39.9 fortsätter fungera. Se [pocketbase-flytten.md](pocketbase-flytten.md) innan du uppdaterar.
+
 ```bash
 # Byt ut mot rätt version för din plattform (linux_arm64 för Raspberry Pi,
 # linux_amd64 för de flesta NAS/datorer) — se https://pocketbase.io/docs/
