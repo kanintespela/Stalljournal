@@ -46,11 +46,10 @@ window.addEventListener('vite:preloadError', () => {
   window.location.reload()
 })
 
-// Kartsidorna och importsidan lazy-laddas: Leaflet och xlsx är stora
-// och behövs inte vid vanlig appstart.
+// Kartsidorna lazy-laddas: Leaflet är stort och behövs inte vid vanlig
+// appstart.
 const PlacesPage = lazy(() => import('./pages/PlacesPage'))
 const PlaceFormPage = lazy(() => import('./pages/PlaceFormPage'))
-const ImportPage = lazy(() => import('./pages/ImportPage'))
 
 // basename följer Vites base så att appen fungerar både lokalt (/) och
 // på GitHub Pages (/Stalljournal/)
@@ -110,7 +109,6 @@ const router = createBrowserRouter([
       { path: 'mer/slakterier', element: <SlaughterhousesPage /> },
       { path: 'mer/dokument', element: <DocumentsPage /> },
       { path: 'mer/rapport', element: <AnnualReportPage /> },
-      { path: 'mer/import', element: <Suspense fallback={null}><ImportPage /></Suspense> },
       { path: 'mer/synk', element: <SyncPage /> },
       { path: 'mer/egenskaper', element: <TraitsPage /> },
       { path: 'mer/egenskaper/:id', element: <KeyByParam Component={TraitDetailPage} /> },

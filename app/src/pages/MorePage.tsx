@@ -94,14 +94,6 @@ export default function MorePage() {
             </div>
           </Link>
         </li>
-        <li>
-          <Link to="/mer/import" className="card">
-            <div className="card-main">
-              <span className="card-title card-subtitle">Importera från Excel</span>
-              <span className="card-meta">Excel-import av en tidigare export — sällan behövt efter första importen</span>
-            </div>
-          </Link>
-        </li>
       </ul>
       <p className="count">Version {__APP_COMMIT__} · byggd {buildTime}</p>
     </div>
