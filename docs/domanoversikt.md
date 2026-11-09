@@ -93,6 +93,14 @@ Allt som händer i en besättning har inte ett eget formulär — blodprov för 
 
 Anteckningar syns i journalflödet, på djurkortet och på gruppsidan, och kan ändras eller tas bort i efterhand. Underlag som labbsvar eller remisser sparas som PDF under Dokument.
 
+### Journalflödet
+Journalvyn samlar alla händelser (vägning, behandling, lamning, betäckning, hull, provtagning, foder, flytt, extern flytt och anteckningar) i en tidslinje, nyast först. Eftersom flödet snabbt växer till hundratals poster är det **grupperat per månad och dag**: innevarande månad och senaste månaden med händelser är öppna, äldre månader hopfällda (men öppna så fort man söker eller filtrerar). Man kan avgränsa med
+- **fritextsökning** (djurnummer, namn, gruppnamn, preparat, anteckningstext …),
+- **kategorichips** — flera åt gången, med antal per kategori givet övriga filter,
+- **period** — 7 dagar, 30 dagar, i år eller eget från/till-datum.
+
+Filtren ligger i adressen (`/journal?kat=Behandling&q=ivomec&p=30`), så vyn finns kvar efter att man öppnat en post och går att dela som länk. Journalen lagrar bara datum, inte klockslag. Filtreringen är ren visning i appen — inget av det lagras eller synkas.
+
 ### Foder
 Utfodring registreras per grupp: fodertyp, mängd och datum.
 

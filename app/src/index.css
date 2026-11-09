@@ -193,6 +193,83 @@ h3 { font-size: 0.95rem; margin: 12px 0 4px; }
 .facts dd { margin: 0; font-size: 0.95rem; }
 .ewe-result summary { cursor: pointer; font-size: 0.95rem; }
 .details-body { margin-top: 10px; }
+/* Journalvy: filter, månads-/dagsgruppering */
+.filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px; }
+.chip {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.chip-active { background: var(--green); border-color: var(--green); color: #fff; font-weight: 600; }
+.chip-count { opacity: 0.65; font-size: 0.78rem; margin-left: 2px; }
+.date-range { display: flex; gap: 10px; margin: 0 0 10px; }
+.date-range label { flex: 1; display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+.date-range input {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  background: var(--card);
+  color: var(--text);
+}
+.journal-summary { margin: 4px 0 8px; font-size: 0.85rem; }
+.text-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--green);
+  font-size: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.journal-month { margin-top: 4px; }
+.journal-month-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: var(--card);
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 10px 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+}
+.journal-chevron { width: 1em; color: var(--muted); }
+.journal-month-count { margin-left: auto; font-size: 0.8rem; }
+.journal-day-header {
+  margin: 12px 0 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+}
+.journal-list { list-style: none; margin: 0; padding: 0; font-size: 0.95rem; }
+.journal-list li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+.journal-list li:last-child { border-bottom: none; }
+.journal-cat {
+  display: inline-block;
+  min-width: 5.5em;
+  text-align: center;
+  border-radius: 6px;
+  padding: 1px 7px;
+  margin-right: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: hsl(var(--h, 0) var(--s, 0%) 92%);
+  color: hsl(var(--h, 0) var(--s, 0%) 28%);
+}
 .link-list { margin: 4px 0 0; padding-left: 18px; font-size: 0.95rem; }
 .link-list li { margin-bottom: 4px; }
 a { color: var(--green); }
